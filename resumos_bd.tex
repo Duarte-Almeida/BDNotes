@@ -712,6 +712,11 @@ GROUP BY course_id, semester, year, sec_id
 HAVING COUNT(ID) >= 2;
 \end{lstlisting}
 
+\subsection{Agregação com Valores NULL e Booleanos}
+As funções de agregação tratam o valor null do seguinte modo: todas as funções de agregação exceto o \textbf{COUNT (*)} ignoram valores null para a coleção de input. Como resultado de ignorar null values, a coleção de valores pode ser vazia. O \textbf{COUNT} de uma coleção vazia é definido como 0, e todas as outras operações de agregação retorna o valor de null quando aplicado numa coleção vazia.
+
+O tipo de dados Booleano pode assumir valores \textbf{true}, \textbf{false} e \textbf{unknown}. As funções de agregação \textbf{SOME} e \textbf{ALL} podem ser aplicadas a uma coleção de valores Booleanos, e computar a disjunção (\textbf{OR}) e a conjunção (\textbf{AND}), respetivamente, dos valores.
+
 \section{Sub-Consultas Aninhadas}
 O SQL fornece um mecanismo de aninhamento de sub-consultas.
 \begin{definition}
