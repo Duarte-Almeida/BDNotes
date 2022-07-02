@@ -1,4 +1,4 @@
-\documentclass[titlepage]{book}
+\documentclass[oneside]{book}
 
 \usepackage[portuguese]{babel}
 \usepackage[utf8]{inputenc}
@@ -835,7 +835,6 @@ WHERE 1 >= (SELECT COUNT(R.course_id)
 O SQL permite uma sub-consulta ser usada como expressão na cláusula \textbf{FROM}. O conceito-chave aplicado aqui é que a expressão \textbf{SELECT-FROM-WHERE} retorna uma relação como resultado, e, como tal, pode ser inserido noutro \textbf{SELECT-FROM-WHERE} em qualquer lado que uma relação possa aparecer.
 
 \textbf{1)} Seja a seguinte consulta: "Encontra o salário médio dos instrutores cujos departamentos têm um salário médio maior que 2500€.". Temos:
-\pagebreak
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
 SELECT dept_name, avg_salary
 FROM (SELECT dept_name, AVG(salary) as avg_salary
@@ -1194,7 +1193,7 @@ CREATE VIEW fisica_1semestre_2017 AS
         AND section.year = 2017;
 \end{lstlisting}
 
-\subsection{Usar Vistas em Consultas SQL}
+\subsection{Vistas em Consultas SQL}
 Uma vez definida uma vista, podemos usar o nome que lhe foi atribuída para nos referirmos à relação que a vista gera.
 
 \textbf{1)} Seja a seguinte consulta: "Liste todos os cursos de Física oferecidos no 2º semestre do ano de 2017 que estão no edifício Watson).". Temos:
@@ -1253,7 +1252,8 @@ Em geral, no SQL uma vista diz-se \textbf{atualizável}, i.e., permite o uso dos
 
 Contudo, as vistas podem também ser definidas com a opção \textbf{WITH CHECK} que aquando da tentativa de atualização da vista, se as restrições especificados na opção não forem verificadas, a atualização é descartada.
 
-\section{Transações}
+\chapter{Transações}
+\section{Introdução às Transações}
 \begin{definition}
     Uma transação é um conjunto de operações de um programa que formam uma unidade lógica de trabalho na qual podem ser acedidos e atualizados vários dados.
 \end{definition}
@@ -1267,7 +1267,7 @@ Existem 2 questões a resolver nas transações:
 Existem, como tal, 3 caminhos possíveis para a conclusão de uma transação:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap2/caminhos_transacoes.png}
+    \includegraphics[scale = 0.4]{cap3/caminhos_transacoes.png}
     \caption{3 caminhos possíveis de uma transação}
 \end{figure}
 
@@ -1283,11 +1283,11 @@ As transações tem 4 grandes propriedades (\textbf{ACID}):
 Podemos esquematizar uma transação com o seguinte diagrama de estados:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap2/diagrama_estados_trans.png}
+    \includegraphics[scale = 0.4]{cap3/diagrama_estados_trans.png}
     \caption{Diagrama de estados de uma transação}
 \end{figure}
 
-\subsection{Transações em SQL}
+\section{Transações em SQL}
 Uma \textbf{transação} em SQL consiste na sequência de instruções de consulta e/ou atualização. O SQL \textit{standard} especifica que uma transação começa implicitamente quando uma instrução SQL é executada.
 
 Uma das seguintes instruções SQL deve terminar a transação:
@@ -1344,7 +1344,6 @@ Eis os níveis de consistência em SQL:
     \item[--] \textbf{Read uncommitted}: qualquer tuplo não confirmado pode ser lido.
 \end{itemize}
 Para alterarmos o nível de consistência devemos usar o seguinte comando:
-\pagebreak
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
 SET TRANSACTION ISOLATION LEVEL
     { READ UNCOMMITTED
@@ -1364,7 +1363,7 @@ Definimos ainda sobre os níveis de isolamento em SQL:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap2/isolamento_transacoes.png}
+    \includegraphics[scale = 0.4]{cap3/isolamento_transacoes.png}
     \caption{Consistência e Isolamento em SQL}
 \end{figure}
 
