@@ -979,4 +979,185 @@ SET salary = CASE
              END
 \end{lstlisting}
 
+\section{Expressões JOIN}
+Até agora, usámos o produto Cartesiano para combinar informação de múltiplas relações. O operador \textbf{JOIN} permite escrever consultas com múltiplas relações de um modo mais natural.
+
+\subsection{Natural JOIN} 
+A operação de \textbf{NATURAL JOIN} opera em 2 relações e produz uma relação como resultado. Considera apenas os pares de tuplos com o mesmo valor nos atributos que aparecem nos esquemas de ambos. \\
+Assim, \\
+\textbf{1)} Seja a seguinte consulta: "Para todos os estudantes na universidade que tiraram um curso, descobre o nome e o ID do curso que tiraram.". Temos:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- Antes do JOIN
+SELECT name, course_id
+FROM student, takes
+WHERE student.ID = takes.ID
+
+-- Com Natural JOIN
+SELECT name, course_id
+FROM student NATURAL JOIN takes
+
+-- AMBAS AS QUERIES GERAM O MESMO RESULTADO
+\end{lstlisting}
+
+De notar que o que realmente está a acontecer ao fazer \textbf{NATURAL JOIN} é que se estão a considerar apenas os pares de tuplos onde quer o tuplo de \textit{student}, quer o tuplo de \textit{takes} têm o mesmo valor no atributo comum, \textbf{ID}.
+
+O resultado de uma operação de \textbf{NATURAL JOIN} é uma relação. Uma cláusula \textbf{FROM} de uma consulta SQL pode ter múltiplas relações combinadas usando o \textbf{NATURAL JOIN}. A consulta SQL na sua forma geral usando \textbf{NATURAL JOIN}'s é dada por:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT A_1, A_2, ..., A_n
+FROM E_1, E_2, ..., E_m
+WHERE P;
+\end{lstlisting}
+
+Por sua vez, cada $E_i$ pode ser uma única relação ou uma expressão envolvendo \textbf{NATURAL JOIN}'s.
+
+\textbf{1)} Seja a seguinte consulta: "Lista os nomes dos estudantes bem como o título dos cursos que já tiraram.". Temos:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- Exemplificação da formula geral (primeiro faz o NATURAL JOIN, so depois o produto cartesiano)
+SELECT name, title
+FROM student NATURAL JOIN takes, course
+WHERE takes.course_id = course.course_id;
+\end{lstlisting}
+
+De notar que não podemos fazer um duplo \textbf{NATURAL JOIN}, pois necessitaríamos que os valores dos atributos \textit{dept\_name} e \textit{course\_id} fossem iguais, quando só queremos juntar o \textit{course\_id}. 
+
+Para tal, o SQL fornece a operação \textbf{JOIN \dots USING} que leva no \textbf{USING} uma lista de nomes de atributos a serem especificados. Ou seja, se tivéssemos 
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+r_1 JOIN r_2 USING (A_1, A_2)
+\end{lstlisting}
+seria semelhante a 
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+r_1 NATURAL JOIN r_2
+\end{lstlisting}
+porém um par de tuplos no primeiro caso corresponde se $t_1.A_1 = t_2.A_1$ e $t_1.A_2 = t_2.A_2$, e mesmo que se tivessem ambos um terceiro atributo $A_3$, não seria necessário $t_1.A_3 = t_2.A_3$, enquanto que no segundo caso já seria.
+
+\subsection{Condições JOIN}
+O SQL suporta outra forma de \textbf{JOIN}, no qual uma condição arbitrária pode ser especificada com a palavra-chave \textbf{ON}. Esta palavra-chave recebe um predicado geral sobre as relações a serem \textbf{JOIN}ed e aparece no fim da expressão \textbf{JOIN}.
+
+\textbf{0)} Seja a seguinte consulta:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT *
+FROM student JOIN takes ON student.ID = takes.ID;
+
+-- Equivalente a
+SELECT *
+FROM student, takes
+WHERE student.ID = takes.ID;
+\end{lstlisting}
+
+De notar que o que difere isto de um \textbf{NATURAL JOIN} é que a relação resultante tem o atributo ID listado 2 vezes, 1 para \textit{student} e outro para \textit{takes}, apesar dos seus valores terem de ser o mesmo.
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- Alternativa ao problema supramencionado
+SELECT student.ID as ID, name, dept_name, tot_cred, 
+       course_id, sec_id, semester, year, grade
+FROM student JOIN takes ON student.ID = takes.ID;
+\end{lstlisting}
+
+\subsection{Outer JOIN}
+A operação \textbf{OUTER JOIN} funciona de forma similar às que já vimos, mas preserva os tuplos que seriam perdidos num \textbf{JOIN} ao criar tuplos no resultado que contêm \textbf{valores null}. É importante referir que quer o \textbf{NATURAL JOIN}, quer o \textbf{JOIN \dots ON} não conseguiriam corresponder um valor null a outro não null.
+
+Existem 3 formas de \textbf{OUTER JOIN} (consideremos \textbf{A $<$keyword$>$ OUTER JOIN B}):
+\begin{itemize}
+    \itemsep0cm
+    \item[--]\textbf{LEFT OUTER JOIN}: preserva os tuplos apenas da relação A;
+    \item[--]\textbf{RIGHT OUTER JOIN}: preserva os tuplos apenas da relação B;
+    \item[--]\textbf{FULL OUTER JOIN}: preserva os tuplos das relações A e B;
+\end{itemize}
+
+Em contraste, as operações \textbf{JOIN \dots USING}, \textbf{NATURAL JOIN} e \textbf{JOIN \dots ON P} são chamadas operações \textbf{INNER JOIN}.
+
+A operação de \textbf{LEFT OUTER JOIN} opera do seguinte modo:
+\begin{verbatim}
+res = A NATURAL JOIN B
+for each tuple r in A that doesn't match with B:
+    r->derived_from_A = r->derived_from_A
+    (r->derived_from_B \ r->derived_from_A) = null
+    // considera-se r = r->derived_from_A U r->derived_from_B
+    res += {r}
+\end{verbatim}
+
+Se considerarmos um estudante que nunca tenha tirado um curso, podemos agora listar todos os estudantes e os seus cursos (mesmo que ainda não tenham tirado um), do seguinte modo:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT *
+FROM student NATURAL LEFT OUTER JOIN takes;
+\end{lstlisting}
+
+\textbf{1)} Seja a seguinte consulta: "Encontra todos os alunos que ainda não tiraram um curso.". Temos:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- Usando LEFT OUTER JOIN
+SELECT ID
+FROM student NATURAL LEFT OUTER JOIN takes
+WHERE course_id IS NULL;
+
+-- Usando RIGHT OUTER JOIN (simetrico)
+SELECT ID
+FROM takes NATURAL RIGHT OUTER JOIN student
+WHERE course_id IS NULL;
+\end{lstlisting}
+
+O \textbf{FULL OUTER JOIN} é uma combinação de \textbf{LEFT OUTER JOIN} e \textbf{RIGHT OUTER JOIN}. Depois de computar o resultado do \textbf{INNER JOIN}, extende com \textbf{nulls} os tuplos do lado esquerdo da relação que não corresponderam com nenhum do lado direito da relação, e vice-versa. Por outras palavras, \textbf{FULL OUTER JOIN} = \textbf{LEFT OUTER JOIN} $\cup$ \textbf{RIGHT OUTER JOIN}.
+
+\textbf{2)} Seja a seguinte consulta: "Exiba uma lista de todos os estudantes no departamento de Engenharia Informática, bem como as secções de curso, se alguma, que ocorreram no 2º semestre de 2017; todas as secções de curso do 2º semestre de 2017 devem ser dispostas, mesmo que nenhum estudante de Engenharia Informática tenha tirado a secção do curso.". Temos:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT *
+FROM (SELECT *
+      FROM STUDENT
+      WHERE dept_name='Engenharia Informatica')
+      NATURAL FULL OUTER JOIN
+      (SELECT * 
+       FROM TAKES
+       WHERE semester=2 AND year=2017);
+\end{lstlisting}
+
+A cláusula \textbf{ON} pode ser usada com \textbf{OUTER JOIN}'s. É importante notar que este difere do modo como a cláusula \textbf{WHERE} opera, ao contrário dos \textbf{INNER JOIN}.
+Ou seja,
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- LEFT OUTER JOIN (ON)
+SELECT *
+FROM student LEFT OUTER JOIN takes ON student.ID = takes.ID;
+
+-- LEFT OUTER JOIN (WHERE)
+SELECT *
+FROM student LEFT OUTER JOIN takes ON true
+WHERE student.ID = takes.ID
+\end{lstlisting}
+
+O caso do \textbf{ON} tem um tuplo com estudantes que ainda não tenham tirado nenhum curso. No caso do \textbf{WHERE}, o \textit{takes ON true} faz com que o \textbf{LEFT OUTER JOIN} se comporte como um produto Cartesiano das 2 relações. Seja um estudante que ainda não tenha tirado um curso com ID = 69. A cláusula \textbf{WHERE} não irá encontrar nenhuma correspondência entre \textit{student}.ID e \textit{takes}.ID, pois não existe nenhum tuplo em \textit{takes} com ID = 69.
+
+\subsection{Tipos e Condições de JOIN}
+Para distinguir \textbf{JOIN}'s normais de \textbf{OUTER JOIN}'s, os \textbf{JOIN}'s normais são designados \textbf{INNER JOIN}'s em SQL.
+
+Uma cláusula de \textbf{JOIN} pode ser usada para especificar \textbf{INNER JOIN} em vez de \textbf{OUTER JOIN} para espeficar que se quer um \textbf{JOIN} normal. Contudo, a palavra-chave \textbf{INNER} é opcional, pois por defeito, a cláusula \textbf{JOIN} efetua um \textbf{INNER JOIN} ou \textbf{JOIN} normal, ou seja,
+
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- JOIN
+SELECT *
+FROM student JOIN takes USING (id);
+
+-- INNER JOIN
+SELECT *
+FROM student INNER JOIN takes USING (id);
+\end{lstlisting}
+estas 2 consultas são absolutamente equivalentes.
+
+Eis uma lista que mostra que os vários tipos de \textbf{JOIN} (\textbf{INNER}, \textbf{LEFT OUTER}, \textbf{RIGHT OUTER} e \textbf{FULL OUTER}) podem ser combinados com qualquer condição de \textbf{JOIN} (\textbf{NATURAL}, \textbf{USING} ou \textbf{ON}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{cap2/join_tipos_conds.png}
+    \caption{Tipos e Condições de \textbf{JOIN}}
+\end{figure}
+
+Por fim, deixo uma nota sobre o \textbf{CROSS JOIN}. Estas 2 consultas são equivalentes:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT *
+FROM student, takes;
+
+-- equivalente a
+
+SELECT *
+FROM student CROSS JOIN takes;
+\end{lstlisting}
+
+
+
 \end{document}
