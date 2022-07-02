@@ -1012,7 +1012,7 @@ Por sua vez, cada $E_i$ pode ser uma única relação ou uma expressão envolven
 
 \textbf{1)} Seja a seguinte consulta: "Lista os nomes dos estudantes bem como o título dos cursos que já tiraram.". Temos:
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
--- Exemplificação da formula geral (primeiro faz o NATURAL JOIN, so depois o produto cartesiano)
+-- Exemplificacao da formula geral (primeiro faz o NATURAL JOIN, so depois o produto cartesiano)
 SELECT name, title
 FROM student NATURAL JOIN takes, course
 WHERE takes.course_id = course.course_id;
@@ -1158,6 +1158,214 @@ SELECT *
 FROM student CROSS JOIN takes;
 \end{lstlisting}
 
+\section{Vistas}
+Podemos querer criar uma coleção personalizade de relações "virtuais"\footnote{Diz-se virtual pois as vistas mapeiam dados das tabelas do \textbf{modelo físico} para um novo \textbf{modelo lógico}, havendo independência lógica entre estes 2 modelos.} que melhor se adequam a uma certa intuição do utilizador sobre a estrutura da organização. No exemplo da universidade, podemos querer listar todos as secções de curso oferecidas pelo departamento de Física no 2º semestre do ano de 2016, com o edifício e número de sala de cada secção. A consulta correspondente seria:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT course.course_id, sec_id, building, room_number
+FROM course, section
+WHERE course.course_id = section.course_id
+    AND course.dept_name = 'Fisica'
+    AND section.semester = 2
+    AND section.year = 2017;
+\end{lstlisting}
+É possível computar e guardar os valores destas consultas e torná-las disponíveis aos utilizadores. Porém, se algum dos valores em \textit{instructor}, \textit{course} ou \textit{section} mudarem, os valores consultados guardados não correspondem à realidade.
 
+Assim, o SQL permite uma "relação virtual" ser definida por uma consulta, e esta mesmo relação conceptual contém o resultado da consulta - a consulta é computada sempre que a relação virtual é usada. Já vimos algo semelhante com a clásula \textbf{WITH}, que nos permite nomear uma sub-consulta para uma consulta apenas. A \textbf{VIEW} permite estender o conceito de relação virtual para além de uma única consulta.
+
+\subsection{Definição de Vista}
+Definimos uma vista em SQL usando o comando \textbf{CREATE VIEW}. Para definir a vista devemos nomeá-la e definir qual a consulta que a computa.
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+CREATE VIEW v AS <expressao da consulta>;
+\end{lstlisting}
+
+Para a remover da base de dados, é igual a qualquer outro objeto de uma base de dados:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+DROP VIEW v;
+\end{lstlisting}
+
+Considerando a consulta que foi apresentada no início do sub-capítulo, podemos definir uma vista sobre essa consulta.
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+CREATE VIEW fisica_1semestre_2017 AS
+    SELECT course.course_id, sec_id, building, room_number
+    FROM course, section
+    WHERE course.course_id = section.course_id
+        AND course.dept_name = 'Fisica'
+        AND section.semester = 2
+        AND section.year = 2017;
+\end{lstlisting}
+
+\subsection{Usar Vistas em Consultas SQL}
+Uma vez definida uma vista, podemos usar o nome que lhe foi atribuída para nos referirmos à relação que a vista gera.
+
+\textbf{1)} Seja a seguinte consulta: "Liste todos os cursos de Física oferecidos no 2º semestre do ano de 2017 que estão no edifício Watson).". Temos:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT course_id
+FROM fisica_1semestre_2017
+WHERE building = 'Watson';
+\end{lstlisting}
+
+Naturalmente, podemos criar vistas que usem vistas na sua consulta, desde que as vistas usadas na consulta estejam previamente definidas. Ou seja,
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+CREATE VIEW fisica_1semestre_2017_watson AS
+    SELECT course_id, room_number
+    FROM fisica_1semestre_2017
+    WHERE building = 'Watson';
+\end{lstlisting}
+
+\subsection{Vistas Materializadas}
+Certos SGBD permitem relações serem armazenadas, mas para tal, se relações que são usadas em vistas mudarem, a vista é mantida atualizada - tais vistas são chamadas \textbf{vistas materializadas}.
+
+Isto permite que os resultados duma vista sejam armazenados na base de dados, permitindo consultas que usem a vista para potencialmente \textbf{correrem muito mais rapidamente}, pois usa resultados pré-computados, ao invés de recomputá-los.
+
+Assim, se um tuplo \textit{instructor} é adicionada à relação \textit{instructor} e uma vista usa essa mesma relação, é necessário manter a vista atualizada - o processo de manter a \textbf{vista materializada} atualizada é designado \textbf{manutenção da vista}. Este processo pode ocorrer imediatamente quando uma das relações da qual a vista depende é atualizada, ou de um modo preguiçoso, apenas quando a vista é acedida. 
+
+Aplicações que usam uma vista frequentemente ou que necessitam resposta rápida a certas consultas que computam agregações sobre relações grandes beneficiariam de uma \textbf{vista materializada}.
+
+No contexto do PostgreSQL (SGBD da cadeira), eis os comandos:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- Criar vistas materializadas
+CREATE MATERIALIZED VIEW view_exemplo AS SELECT ...
+
+-- Criar tabelas materializadas
+CREATE TABLE table_exemplo AS SELECT ...
+
+-- Atualizacao de vista materializada (MANUAL)
+REFRESH MATERIALIZED VIEW view_exemplo
+
+-- Atualizacao de vista materializada (AUTOMATICO)
+CREATE UNIQUE INDEX idx_view_exemplo
+ON view_exemplo(atributo);
+
+REFRESH MATERIALIZED VIEW CONCURRENTLY view_exemplo;
+\end{lstlisting}
+
+\subsection{Atualização de Vistas}
+Nem todas as vistas são atualizáveis diretamente a partir dos respetivos comandos de atualização, pois a vista pode depender de várias relações simultaneamente.
+
+Em geral, no SQL uma vista diz-se \textbf{atualizável}, i.e., permite o uso dos comandos \textbf{UPDATE}, \textbf{INSERT} e \textbf{DELETE} sse:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] A cláusula \textbf{FROM} só tem 1 relação;
+    \item[--] A cláusula \textbf{SELECT} contém apenas nomes de atributos da relação e \textbf{não tem} quaisquer expressões, agregações ou especificações \textbf{DISTINCT};
+    \item[--] Qualquer atributo na cláusula \textbf{SELECT} pode ser posto a \textbf{null}; i.e, não tem uma restrição \textbf{not null} e não faz parte da chave primária;
+    \item[--] A consulta não tem as cláusulas \textbf{GROUP BY} ou \textbf{HAVING}.
+\end{itemize}
+
+Contudo, as vistas podem também ser definidas com a opção \textbf{WITH CHECK} que aquando da tentativa de atualização da vista, se as restrições especificados na opção não forem verificadas, a atualização é descartada.
+
+\section{Transações}
+\begin{definition}
+    Uma transação é um conjunto de operações de um programa que formam uma unidade lógica de trabalho na qual podem ser acedidos e atualizados vários dados.
+\end{definition}
+Existem 2 questões a resolver nas transações:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{Concorrência}: a execução concorrente de várias transações - resolvida com tem múltiplos processadores disponíveis para múltiplos utilizadores simultâneos;
+    \item[--] \textbf{Integridade}: lidar com falhas de vários tipos, nomeadamente de \textit{hardware}, \textit{crashes} do sistema operativo e falhas de \textit{software} do SGBD - resolvida pelas garantidas de integridade do próprio SGBD.
+\end{itemize}
+
+Existem, como tal, 3 caminhos possíveis para a conclusão de uma transação:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{cap2/caminhos_transacoes.png}
+    \caption{3 caminhos possíveis de uma transação}
+\end{figure}
+
+As transações tem 4 grandes propriedades (\textbf{ACID}):
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{Atomicidade}: numa transação, as alterações ao estado são \textbf{atómicas}: ou todas se realizam ou nenhuma se realiza - a função do sistema é manter informação sobre as alterações efetuadas por cada transação ativa e, em caso de \textit{crash} ou \textit{abort} explícito, desfazer as alterações feitas desde o início da transação até ao ponto de rutura.
+    \item[--] \textbf{Consistência}: uma transação é uma \textbf{transformação correta} do estado, por exemplo, o conjunto das ações da transação não viola nenhuma das regras de integridade associadas ao estado - a função do sistema é assegurar que a base de dados evolui de um estado coerente para outro estado coerente. Os estados coerentes são definidos pela lógica aplicacional.
+    \item[--] \textbf{Isolamento}: embora as transações se executem concorrentemente, os estados intermédios de uma transação são invisíveis a todas as restantes transações. Estas vêm apenas ou o estado inicial ou o estado final - a função do sistema é garantir que uma transação apenas "vê" (leituras/escritas) alterações realizadas por transações \textit{committed}.
+    \item[--] \textbf{Durabilidade}: uma vez completada uma transação (\textit{commit} concluído), todas as alterações ao estado são imutáveis, sobrevivendo a qualquer falta do sistema - a função do sistema é manter informação sobre alterações efetuadas por cada uma das transações \textit{committed} e, em caso de \textit{crash}m refazer as alterações que ainda não se encontravam registadas em disco.
+\end{itemize}
+
+Podemos esquematizar uma transação com o seguinte diagrama de estados:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{cap2/diagrama_estados_trans.png}
+    \caption{Diagrama de estados de uma transação}
+\end{figure}
+
+\subsection{Transações em SQL}
+Uma \textbf{transação} em SQL consiste na sequência de instruções de consulta e/ou atualização. O SQL \textit{standard} especifica que uma transação começa implicitamente quando uma instrução SQL é executada.
+
+Uma das seguintes instruções SQL deve terminar a transação:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{COMMIT [WORK]} confirma a transação ativa; i.e, faz as atualizações realizadas pela transação permanentes na base de dados.
+    \item[--] \textbf{ROLLBACK [WORK]} causa a transação ativa a ser desfeita; i.e, desfaz todas as atualizações feitas por instruções SQL na transação, pelo que a base de dados volta ao estado imediatamente antes da transação.
+\end{itemize}
+
+\textbf{1)} Seja a seguinte transação: "Escreva uma transação que permita transferir 350€ da conta A para a conta B.". Temos:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+-- Verificar saldos
+SELECT balance
+FROM account
+WHERE account_number='A';
+
+SELECT balance
+FROM account
+WHERE account_number='B';
+
+-- Transferir 350 euros de A para B
+START TRANSACTION;
+-- Retirar de A
+UPDATE account
+SET balance = balance - 350
+WHERE account_number='A';
+-- Adicionar a B
+UPDATE account
+SET balance = balance + 350
+WHERE account_number='B';
+-- Confirmar a transação
+COMMIT;
+\end{lstlisting}
+
+Vários sistemas usam \textit{auto-commit} por defeito, onde o início explícito de início de transação é omitido, e cada consulta é uma transação - se houver erros dá \textbf{ROLLBACK} automático, c.c, \textbf{COMMIT} automático.
+
+Para lidar com a concorrência, normalmente usam-se modelos de trincos, e trancam-se tuplos envolvidos numa operação antes de lhes aceder.
+Para a seguinte consulta que tenciona ver em que departamento é que os instrutores chamados "João Aragonez" trabalham:
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SELECT dept_name
+FROM instructor
+WHERE name = 'Joao Aragonez';
+\end{lstlisting}
+seria necessário bloquear toda a relação \textit{instructor}, para assegurar que não possam ser inseridos novos registos com \textit{name} = 'João Aragonez'. Porém, trancar a relação inteira implica acabar com concorrência.
+
+Para combater este problema, existem níveis de isolamento menos exigente, onde algumas operações não exigem 100\% de consistência, por exemplo, o saldo médio de todas as contas registadas num banco, o cálculo de dados estatísticos para otimização de operações. A solução passa por um \textit{trade-off} entre exatidão dos resultados e desempenho do sistema, preferindo que neste tipo de transações, não seja feito a seralização com outras, ou seja, poupam-se as verificações e deixa-se a transação correr livremente em paralelo.
+
+Eis os níveis de consistência em SQL:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{Serializable}: por defeito.
+    \item[--] \textbf{Repeatable read}: relativamente igual à \textbf{Serializable}, mas permite por exemplo uma transação $T_1$ fazer uma consulta sobre o número de instrutores chamados João Aragonez e haver outra transação $T_2$ que cria ou modifica um tuplo contendo um instrutor chamado João Aragonez antes que $T_1$ seja confirmado.
+    \item[--] \textbf{Read committed}: só permite a leitura de tuplos confirmados;
+    \item[--] \textbf{Read uncommitted}: qualquer tuplo não confirmado pode ser lido.
+\end{itemize}
+Para alterarmos o nível de consistência devemos usar o seguinte comando:
+\pagebreak
+\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+SET TRANSACTION ISOLATION LEVEL
+    { READ UNCOMMITTED
+    | READ COMMITTED
+    | REPEATABLE READ
+    | SERIALIZABLE
+    }
+\end{lstlisting}
+
+Definimos ainda sobre os níveis de isolamento em SQL:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{phantom read}: fazendo a mesma consulta duas vezes, o número de registos pode ser diferente, se entretanto outra transação que inseriu registos foi confirmada.
+    \item[--] \textbf{nonrepeatable read}: fazendo a mesma consulta duas vezes, cada registo pode conter dados diferentes, se entretanto outra transação que fez \textbf{UPDATE} foi confirmada.
+    \item[--] \textbf{dirty read}: fazendo a mesma consulta duas vezes, é possível ver os dados alterados por outras transações que estão a correr e ainda nem sequer foram confirmadas.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.4]{cap2/isolamento_transacoes.png}
+    \caption{Consistência e Isolamento em SQL}
+\end{figure}
 
 \end{document}
