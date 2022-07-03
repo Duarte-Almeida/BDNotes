@@ -15,6 +15,11 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{colortbl}
+\usepackage{subfig}
+\usepackage{multirow}
+
 \usepackage{caption}
 \usepackage{subcaption}
 
@@ -209,6 +214,7 @@ O processo de conceção de um base de dados incide inicialmente no \textbf{dese
 \section{Utilizadores de Bases de Dados}
 
 \begin{itemize}
+    \itemsep0cm
     \item[--] \textbf{Implementadores de Bases de Dados;}
     \item[--] \textbf{Utilizadores das aplicações;} 
     \item[--]\textbf{Programadores de aplicações} ao definirem o modelo lógico do sistema de informação;
@@ -432,7 +438,7 @@ O produto Cartesiano resultante combina tuplos que não têm qualquer tipo de re
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap2/prod_cartesiano.png}
+    \includegraphics[scale = 0.4]{cap_sql/prod_cartesiano.png}
     \caption{Produto cartesiano da relação \textit{instructor} com a relação \textit{teaches}}
 \end{figure}
 
@@ -1161,7 +1167,7 @@ Eis uma lista que mostra que os vários tipos de \textbf{JOIN} (\textbf{INNER}, 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.5]{cap2/join_tipos_conds.png}
+    \includegraphics[scale = 0.5]{cap_sql/join_tipos_conds.png}
     \caption{Tipos e Condições de \textbf{JOIN}}
 \end{figure}
 
@@ -1512,12 +1518,14 @@ GRANT REFERENCES (dept_name) ON department TO Aragonez;
 
 Um \textbf{Persistent Stored Module} (\textbf{PSM}) pode ser de 2 tipos:
 \begin{itemize}
+    \itemsep0cm
     \item[--] Uma \textbf{stored function} que \textbf{retorna um valor} mas \textbf{não altera} o estado da base de dados - combina \textit{inputs} e resultados das consultas da base de dados para produzir o \textit{output}.
     \item[--] Um \textbf{stored procedure} que \textbf{pode mudar} o estado da base de dados e \textbf{não retorna nenhum valor} - consulta e atualiza a base de dados.
 \end{itemize}
 
 As vantagens de usarmos \textbf{PSM}:
 \begin{itemize}
+    \itemsep0cm
     \item[--] Torna as aplicações \textbf{mais rápidas}: os PSM são compilados e mantidos dentro da base de dados.
     \item[--] \textbf{Reduz a troca de dados}: especialmente entre a aplicação e o servidor da base de dados.
     \item[--] Introduz \textbf{1 nível de indireção}: pode ser chamado por aplicações escritas em linguagens distintas.
@@ -1525,6 +1533,7 @@ As vantagens de usarmos \textbf{PSM}:
 
 As desvantagens de usarmos \textbf{PSM}:
 \begin{itemize}
+    \itemsep0cm
     \item[--] \textbf{Debugging} e \textbf{profiling} pode ser extremamente difícil;
     \item[--] O ambiente de desenvolvimento depende altamente do SGBD usado.
 \end{itemize}
@@ -1720,6 +1729,412 @@ END
 $$;
 \end{lstlisting}
 
+
+
+\section{Triggers}
+\begin{definition}
+    Um trigger é uma instrução que o sistema executa automaticamente aquando de uma modificação na base de dados (operações como \textbf{INSERT, UPDATE} ou \textbf{DELETE}).
+\end{definition}
+
+Para definirmos um trigger devemos:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Especificar quando é que o trigger é suposto ser executado. Isto decompõe-se num \textit{evento} que causa o trigger a ser verificado e uma \textit{condição} deve ser satisfeita para a execução do trigger proceder.
+    \item[--] Especificar as \textit{ações} a tomar quando o trigger executar.
+\end{itemize}
+Diz-se então que os triggers são especificados usando as regras \textbf{\textit{event-condition-action}}.
+
+\subsection{Necessidade de Triggers}
+Os triggers podem ser usados para:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Implementar certas \textbf{restrições de integridade};
+    \item[--] \textbf{Agir automaticamente} mediante a junção de certas condições bem definidas - estas ações podem ser atualizar/mudar/replicar relações, tirar medidas de estatística, etc.
+\end{itemize}
+
+\subsection{Triggers em SQL}
+Como sabemos, um trigger é um procedimento que é automaticamente invocado em resposta a certas atualizações da base de dados.
+
+A sua sintaxe em SQL é dada por:
+
+\begin{lstlisting}[language=SQL, morekeywords={TRIGGER, BEFORE, AFTER, FOR, EACH, ROW, STATEMENT, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar um trigger
+CREATE TRIGGER <nome_trigger>
+    { BEFORE | AFTER } { INSERT | UPDATE | DELETE }
+ON <nome_relacao ou nome_vista>
+WHEN <condicao>
+FOR EACH { ROW | STATEMENT } EXECUTE PROCEDURE <nome_proc>
+
+-- Remover um trigger
+DROP TRIGGER <nome_trigger> ON <nome_relacao ou nome_vista> [IF EXISTS]
+\end{lstlisting}
+
+\textbf{1)} Seja a seguinte operação: "Cria um trigger que não permite que o salário de um instrutor seja abaixo de 800 nem acima de 3000.". Temos:
+
+\begin{lstlisting}[language=SQL, morekeywords={TRIGGER, REPLACE, FUNCTION, RETURNS, $$, IF, NEW, ELSEIF, ENDIF, RETURN, NEW, LANGUAGE, AFTER, FOR, EACH, ROW, PROCEDURE, BEFORE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar o procedimento a executar aquando de um trigger
+CREATE OR REPLACE FUNCTION verf_salario_proc()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.balance < 800 THEN
+        NEW.balance := 800;
+    ELSEIF NEW.balance > 3000 THEN 
+        NEW.balance := 3000;
+    ENDIF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Definir o trigger
+CREATE TRIGGER verf_salario_trigger
+    BEFORE INSERT
+    ON instructor
+    FOR EACH ROW
+    EXECUTE PROCEDURE verf_salario_proc();
+\end{lstlisting}
+
+O comportamento dos triggers mediante serem \textbf{BEFORE} ou \textbf{AFTER} da operação que modifica a base de dados é resumido em:
+
+\begin{table}[H]
+\begin{tabular}{l|c|c|}
+\cline{2-3}
+& BEFORE & AFTER \\ \hline
+\multicolumn{1}{|l|}{\cellcolor[HTML]{C1FFC1}ACTIVATION} & \begin{tabular}[c]{@{}c@{}}O trigger é ativado 1 vez\\ para cada tuplo ou instrução.\end{tabular}                         & \begin{tabular}[c]{@{}c@{}}O trigger é ativado 1 vez para\\ cada tuplo ou instrução sse:\\ - Todos os triggers BEFORE na\\ mesma relação e os relativos à\\ mesma operação são executados\\ com sucesso;\\ - A operação foi executada com \\ sucesso.\end{tabular} \\ \hline
+\multicolumn{1}{|l|}{\cellcolor[HTML]{FFCCC9}FAILURE}    & \begin{tabular}[c]{@{}c@{}}A operação na fila/relação\\ não é executada.\\ Nenhum trigger AFTER é\\ ativado.\end{tabular} & \begin{tabular}[c]{@{}c@{}}A operação na fila/relação\\ não é executada.\end{tabular} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Problemas dos Triggers}
+Os triggers têm \textit{um efeito complexo}, por vezes imprevisível, pois vários triggers podem serem ativados numa única operação e a ação de um trigger pode ativar outro (\textbf{triggers recursivos}).
+
+Podem, como tal, gerar \textit{ciclos de eventos}, com muita dificuldade em depurar e corrigir, bem como instanciar \textit{execuções indesejadas} pois mudanças a uma tabela podem gerar triggers por cadeia que não eram intencionados serem executados.
+
+Se \textit{ocorrerem erros} e o trigger falhar, a operação inteira falha, e é complexa a sua recuperação de falta.
+
+\subsection{Quando Não Usar Triggers}
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textit{Tabelas de Resumo}: usar \textbf{VIEW}s em vez de \textbf{TRIGGER}s, se possível;
+    \item[--] \textit{Restrições de Integridade Complexas}: usar \textbf{CHECK}s sempre que possível;
+    \item[--] \textit{Replicação de Relações}: usar os mecanismos embutidos do SGBD.
+\end{itemize}
+
+\chapter{Desenvolvimento de Aplicações com Bases de Dados}
+A maneira mais comum dos utilizadores interagirem com bases de dados é através de \textit{programas aplicacionais} que fornecem uma interface ao utilizador no \textit{frontend} e interfaces com a base de dados no \textit{backend}.
+
+\section{Programas Aplicacionais e Interfaces de Utilizador}
+Um \textit{programa aplicacional} típico contém uma componente \textit{frontend}, que lida com a interface do utilizador, uma componente \textit{backend}, que comunica com a base de dados, e uma \textit{middle layer}, que contém lógica de negócio, i.e., código que executa pedidos específicos para informação ou atualizações - os comandos SQL podem ser invocados através de qualquer aplicação informática, escrita em qualquer linguagem (\textit{Java, C, PHP, Python, ...}).
+
+Para evitar acesso direto do utilizador à base de dados, que compromete a segurança da mesma, e para haver um único ponto de mudança, i.e., se um utilizador fizer uma mudança local, esta está automaticamente disponível aos demais utilizadores da aplicação e estes não precisarem de descarregar/atualizar a aplicação localmente, usam-se 2 abordagens:
+
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textit{Web browsers} oferecem uma \textbf{\textit{frontend} universal} - usam HTML (\textbf{linguagem \textit{markup}}) como sintaxe e apresentam o conteúdo das páginas de forma "gráfica" ao utilizador.
+    \item[--] Os programas são instalados localmente, mas comunicam com as aplicações \textit{backend} através de uma \textbf{API} e não têm acesso direto à aplicação - é mais usada em aplicações móveis e o seu resultado é normalmente \textbf{XML}.
+\end{itemize}
+
+O modelo de arquitetura de aplicações \textit{web} lecionado na cadeira é o seguinte:
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Arquitetura Aplicação Web]{{\includegraphics[width=8.1cm]{cap_web/arquitetura_web.png} }}%
+    \qquad
+    \subfloat[\centering Distribuição Física]{{\includegraphics[width=8.1cm]{cap_web/dist_fisica.png} }}%
+    \caption{Aplicações Web em BD}%
+    \label{fig:example}%
+\end{figure}
+
+\section{Acesso a SQL numa Linguagem de Programação}
+Existem 2 abordagens para aceder a SQL numa linguagem de programação:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{SQL dinâmico}: permite o programa construir consultas SQL como uma cadeia de caracteres em \textit{runtime}, submeter a consulta e colocar o resultado em variáveis do programa, um tuplo de cada vez.
+    \item[--] \textbf{SQL embutido}: as instruções SQL são identificadas em tempo de compilação usando um pré-processamento que traduz os pedidos feito em SQL embutido em chamadas de funções.
+\end{itemize}
+
+\subsection{SQL Embutido}
+Uma linguagem na qual consultas SQL são embutidas é referida como a \textit{linguagem host}, e as estruturas SQL permitidas na \textit{linguagem host} constituem o \textbf{SQL embutido}.
+
+Programas escritos na \textit{linguagem host} podem usar SQL embutido para aceder e atualizar dados guardados na base de dados - existe um pré-processamento feito antes da compilação que transforma pedidos SQL embutidos com declarações na \textit{linguagem host} e chamadas a procedimentos que permitem o acesso à base de dados durante o \textit{runtime}.
+
+Para identificar pedidos SQL embutidos ao pré-processador, usamos a instrução \textbf{EXEC SQL}, com a forma geral:
+
+\begin{lstlisting}[language=SQL, morekeywords={TRIGGER, REPLACE, FUNCTION, RETURNS, $$, IF, NEW, ELSEIF, ENDIF, RETURN, NEW, LANGUAGE, AFTER, FOR, EACH, ROW, PROCEDURE, BEFORE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+EXEC SQL <instrucao SQL embutida>;
+\end{lstlisting}
+
+Inicialmente, o programa deve-se conectar à base de dados:
+\begin{lstlisting}[language=SQL, morekeywords={char*, EXEC, SQL, CONNECT, IDENTIFIED, DECLARE, SECTION}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Para o exemplo iremos usar C como linguagem host
+-- Declaracao de variabeis
+char* gomas = "Gomas! Yummy!";
+EXEC SQL BEGIN DECLARE SECTION
+char* username = "Aragonez";
+char* password = "Joao";
+EXEC SQL END DECLARE SECTION
+-- Conexao ah base de dados
+EXEC SQL CONNECT :username IDENTIFIED BY :password
+-- Codigo C
+printf("%s\n", gomas);
+\end{lstlisting}
+
+Como vimos, as variáveis da \textit{linguagem host} podem ser usadas em instruções de SQL embutido, mas têm de ser precedidos por dois pontos (:), para as distinguir das variáveis do SQL embutido (\textbf{SQLCODE} que é um \textit{long} que retorna negativo se existir um erro e \textbf{SQLSTATE} que é uma cadeia de caracteres que indica o tipo de erro).
+
+Para iterar sobre os resultados de uma consulta SQL embutido, devemos declarar uma variável \textbf{CURSOR}, que pode ser aberto, e buscar comandos emitidos num loop da \textit{linguagem host} para buscar linhas consecutivas do resultado da consulta - atributos da linha podem ser metidas em variáveis da \textit{linguagem host}.
+
+Exemplificamos agora com um programa em C que usa SQL embutido:
+\begin{lstlisting}[language=SQL, morekeywords={char*, EXEC, SQL, CONNECT, IDENTIFIED, DECLARE, SECTION, CURSOR, FOR, short, FETCH, CLOSE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Declaracao de variabeis
+char SQLSTATE[6]; -- variavel do SQL embutido
+EXEC SQL BEGIN DECLARE SECTION
+char c_iname[30];
+short c_minsalary;
+float c_iage;
+EXEC SQL END DECLARE SECTION
+c_minsalary = random();
+-- Declarar o cursor para a consulta SQL embutida
+EXEC SQL DECLARE iinfo CURSOR FOR
+    SELECT name, age
+    FROM instructor
+    WHERE salary > :c_minsalary
+    ORDER BY name;
+-- Ciclo na linguagem host para dar fetch
+do {
+    EXEC SQL FETCH iinfo INTO :c_iname, :c_age; -- dar fetch p variaveis locais
+    printf("%s is %d years old!\n", c_sname, c_age); -- codigo C puro
+} while (SQLSTATE != '02000');
+EXEC SQL CLOSE iinfo; -- fechar o cursor
+\end{lstlisting}
+
+Podemos ainda usar a instrução SQL \textbf{PREPARE} para executar instruções de SQL embutido pré-definidas, como por exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={char*, EXEC, SQL, CONNECT, IDENTIFIED, DECLARE, SECTION, CURSOR, FOR, short, FETCH, CLOSE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Variavel da linguagem host com instrucao SQL embutida definida
+char c_sqlstring[] = {"DELETE FROM instructor WHERE age > 65"};
+-- Correr a instrucao da variavel
+EXEC SQL PREPARE foobar FROM :c_sqlstring
+EXEC SQL EXECUTE foobar
+\end{lstlisting}
+
+\section{Programação de Aplicação Web}
+A \textbf{Common Gateway Interface (CGI)} define como é que um servidor web comunica com programas aplicacionais. Por sua vez, os programas aplicacionais comunicam com um servidor de base de dados atráveis de \textbf{ODBC/JDBC}.
+
+Como o protocolo \textbf{HTTP} é \textit{connectionless} não existe ligação contínua entre o cliente e o servidor web - quando o servidor recebe um pedido, uma conexão é temporariamente criada que permite a troca de mensagens entre o cliente e o servidor.
+
+Em contraste, quando um utilizador se liga a uma base de dados usando textbf{ODBC/JDBC}, uma sessão é criada e até esta ser terminada toda a informação de sessão é mantida no servidor.
+
+Como as aplicações web (na sua maioria) necessitam de informação de sessão para permitir interagir eficientemente com o utilizador, utilizam-se \textbf{cookies} (já se viu isto em RC, não é relevante explicar como funcionam).
+
+\subsection{Introdução a Scripting, Framework e Driver}
+Usamos \textbf{\textit{scripting languages}} e \textbf{\textit{application frameworks}} para processar pedidos no servidor aplicacional.
+
+Em \textbf{server-side scripting}, antes de entregar uma página \textit{Web} ao cliente, o servidor executa os \textit{scripts} embutidos nos conteúdos HTML da página. Cada pedaço do \textit{script}, quando executado, pode gerar texto que é adicionado à página (ou até mesmo apagar). O código-fonte é apagado da página, pelo que o cliente poderá nem saber que havia código nele antes. O \textit{script} executado pode conter código SQL que é executado sobre uma base de dados, bem como usar diretamente valores de input de formulários HTML preenchidos pelo cliente nas consultas SQL.
+
+Em \textbf{client-side scripting}, os browsers conseguem buscar certos scripts do lado do cliente, ou até mesmo programas ou documentos, e executá-los de um "modo seguro" no lado do cliente, como é exemplo de certos scripts \textit{Javascript}, \textit{Adobe Flash} usado para animações/jogos, etc.
+
+O Python oferece 2 frameworks para \textit{server-side scripting}: \textbf{Flask} e \textit{Django}. Oferece ainda um \textit{driver} como modelo de acesso a SGBD: \textbf{Psycopg}.
+
+\subsection{Flask \& Psycopg}
+Deixo aqui um fluxo da execução de um servidor Web que opera em conjunto com uma SGBD:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{cap_web/server_web_sgbd.png}
+\end{figure}
+A figura acima pode ser legendada da seguinte forma:
+\begin{enumerate}
+    \itemsep0cm
+    \item O cliente realiza um pedido através do protocolo HTTP ao servidor Web;
+    \item O servidor Web tenciona executar um programa externo (\textit{script CGI}) escrito numa \textit{scripting language} (Python neste caso);
+    \item O servidor Web acede ao sistema de ficheiro local para encontrar o \textit{script} localmente;
+    \item O sistema de ficheiros fornece o código Python para ser executado.
+    \item Quaisquer consultas SQL que estejam no código são agora realizadas, havendo comunicação com o SGBD;
+    \item O SGBD retorna os resultados das consultas;
+    \item Os resultados são transformados em HTML e o \textit{server-side script} é apagado da página fonte;
+    \item A página é devolvida ao cliente.
+\end{enumerate}
+
+Escrevamos agora o nosso \textit{script} usando o framework \textbf{Flask} e o driver \textbf{Psycopg}:
+
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+#!/user/bin/python3 ## IMPRESCINDIVEL
+from wsgiref.handlers import CGIHandler
+from flask import Flask
+import psycopg2
+import psycopg2.extras
+
+## Configuracao do SGBD (Psycopg)
+DB_HOST = "db.tecnico.ulisboa.pt"
+DB_USER = "aragonez"
+DB_DATABASE = "aragonez_db"
+DB_PASSWORD = "joao"
+DB_CONNECTION_STRING = "host=%s dbname=%s user=%s password=%s" % (
+    DB_HOST,
+    DB_DATABASE,
+    DB_USER,
+    DB_PASSWORD,
+)
+
+## Configuracao do Framework (Flask)
+app = Flask(__name__)
+## Pagina principal mostra o index
+@app.route("/") ## Decorator - adiciona funcionalidade ao codigo existente
+def index():
+    try:
+        return render_template("index.html") ## render_template built-in do Flask
+    except Exception as e:
+        return str(e)
+
+## Criar uma categoria
+@app.route("/criar_categoria", methods=["POST"]) ## POST pq o cliente enviou dados ao servidor atraves do form
+def executar_criar_categoria():
+    dbConn = None
+    cursor = None
+    try:
+        ## ligar ah bd
+        dbConn = psycopg2.connect(DB_CONNECTION_STRING)
+        cursor = dbConn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        ## processamento do input do cliente
+        name = request.form['category_to_add']
+        if (request.form['category_type'] == 'Simple Category'):
+            query = "INSERT INTO categoria_simples VALUES (%s);"
+        else:
+            query = "INSERT INTO super_categoria VALUES (%s);"
+        cursor.execute(query, (name, ))
+        query = "INSERT INTO categoria VALUES (%s);"
+        cursor.execute(query, (name, ))
+        return query ## Retorna o resultado da query como string para o HTML
+    except Exception as e:
+        return str(e)
+    finally:
+        dbConn.commit()
+        cursor.close()
+        dbConn.close()
+
+## Listar os produtos
+@app.route('/listar_produtos')
+def listar_produtos():
+    dbConn = None
+    cursor = None
+    try:
+        dbConn = psycopg2.connect(DB_CONNECTION_STRING)
+        cursor = dbConn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT * FROM product;"
+        cursor.execute(query)
+        return render_template("listar_produtos.html", cursor=cursor)
+    except Exception as e:
+        return str(e)
+    finally:
+        dbConn.commit()
+        cursor.close()
+        dbConn.close()
+
+## IMPERATIVO ESTAR PRESENTE
+CGIHandler().run(app)
+\end{lstlisting}
+
+Na função em que listamos os produtos, o código chama a função \textit{render\_template} embutida no próprio \textbf{Flask}. Este procura os \textit{templates} pelo nome do ficheiro dado na pasta \textit{templates}.
+
+O \textbf{Flask} por sua vez usa o \textbf{Jinja2} como seu motor de \textit{templates}. Eis alguns dos \textbf{delimitadores} importantes do mesmo:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] $\{\% ... \%\}$ declarações, ex.: if, for, while;
+    \item[--] $\{\{ ... \}\}$ para expressões a serem substituídas na página gerada;
+    \item[--] $\{\# ... \#\}$ para comentários que não devem ser incluídos na página gerada;
+    \item[--] $\#$ para uma linha que contém uma instrução
+\end{itemize}
+
+Exemplo simples da utilização destes delimitadores (\textit{listar\_produtos.html}):
+\begin{lstlisting}[language=html, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+<!doctype html>
+<title> Listar Produtos - Flask</title> <body style="padding:20px">
+{% if cursor %}
+    <table border="2px">
+    <thead> <tr>  <th>EAN</th> <th>Descricao</th> <th>Alterar</th> </thead>
+    <tbody>
+        {% for record in cursor %}
+            <tr> <td>{{record[0]}}</td> <td>{{record[1]}}</td> <td><a href="description?product_ean={{record[0]}}">Alterar Descricao</a> </td> </tr>
+        {% endfor %}
+    </tbody> </table>
+{% else %}
+    <p> Erro: Falha a obter dados da base de dados! </p>
+{% endif %}
+\end{lstlisting}
+
+Se notarmos, a terceira entrada da tabela a partir da esquerda (começando em 1) permite alterar a descrição de um produto. Para isso usa um \textbf{href} que leva para uma nova página \textit{description} e leva como argumento o EAN do produto em questão. Agora basta extender o script \textit{CGI} em \textbf{Flask} para permitir realmente mudar a descrição:
+
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+...
+
+## Configurar o routing para /description
+@app.route("/description")
+def change_description():
+    try:
+        ## params = request.args = records[0] passado no listar_produtos.html
+        return render_template("description.html", params=request.args)
+    except Exception as e:
+        return str(e)
+\end{lstlisting}
+
+Definimos agora o \textit{template} \textit{description.html}:
+\begin{lstlisting}[language=html, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+<html>
+    <body>
+        <h3>Alterar descricao do produto "{{ params.get("product_ean") }}"</h3>
+        <!-- Falta-nos agora usar isto no Flask-->
+        <form action="update_desc" method="post">
+            <p><input type="hidden" name="ean" value="{{ params.get("product_ean")}}"/></p>
+            <p>Nova descricao: <input type="text" name="description"/></p>
+            <p><input type="submit" value="Submeter"/></p>
+        </form>
+    </body>
+</html>
+\end{lstlisting}
+
+E completamos por fim o \textit{CGI}:
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+...
+
+## Configurar o routing para /description
+@app.route("/update_desc", methods=["POST"])
+def update_description():
+    dbConn = None
+    cursor = None
+    try:
+        dbConn = psycopg2.connect(DB_CONNECTION_STRING)
+        cursor = dbConn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = f"UPDATE product SET description={request.form["description"]} WHERE ean='{request.form["ean"]}';" ## SUJEITO A INJECAO SQL
+        cursor.execute(query)
+        return query
+    except Exception as e:
+        return str(e)
+    finally:
+        dbConn.commit()
+        cursor.close()
+        dbConn.close()
+\end{lstlisting}
+
+\subsection{Injeção SQL}
+O problema com o código acima é que imaginando que no \textit{input} do cliente na \textit{description} do formulário HTML, este mesmo escreve:
+\begin{verbatim}
+'new_descr' WHERE ean='111'; UPDATE users SET admin = 'true' WHERE username = 'Aragonez';
+\end{verbatim}
+Isto irá correr diretamente ao executarmos \textit{cursor.execute(query)}, o que representa grandes riscos de segurança.
+
+Em \textbf{Psycopg}, a maneira correta de executar consultas SQL é da seguinte forma:
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+query = "UPDATE product SET description=%s WHERE ean=%s"
+data = (request.form["description"], request.form["ean"])
+cursor.execute(query, data)
+\end{lstlisting}
+
+Outras recomendações básicas de segurança para evitar injeções SQL são:
+\begin{itemize}
+    \itemsep 0cm
+    \item \textit{Forms} com \textit{method = POST} (e não \textit{GET});
+    \item Instruções \textbf{PREPARED};
+    \item SSL;
+    \item Certificados.
+\end{itemize}
+
 \chapter{Teoria da Normalização}
 
 Na conceção do modelo E-A, há certas decisões que se tomam que têm um grande impacto tanto ao nível lógico como ao nível físico e que se só são detetadas no modelo Relacionalm, obrigando por vezes a um processo iterativo de sucessivas reformulações do modelo E-A. Essas qualidades prendem-se com questões de \textbf{redundância e independência de atributos} das relações.
@@ -1889,6 +2304,7 @@ Uma relação encontra-se na 2ª forma normal se e só se se encontrar na 1º fo
 A conversão de uma relação na 1ª forma normal para a 2ª forma normal faz-se do seguinte modo:
 
 \begin{itemize}
+    \itemsep0cm
     \item[--] Para cada atributo não chave $R_n$ que \textbf{depende parcialmente} de um subconjunto de atributos chave de uma chave $K$, $S \subseteq K$, retirá-lo da relação inicial $R$ e criar uma nova relação com chave primária $S$ e com esquema $(S, R_n)$. Mais formalmente, ocorre a seguinte decomposição da relação inicial $R$: 
     \[
         R \gets \{R \setminus R_n,\:  (S, R_n)\}
@@ -1911,6 +2327,7 @@ Uma relação encontra-se na 3ª forma normal se e só se se encontrar na 2º fo
 A conversão de uma relação na 2ª forma normal para a 3ª forma normal faz-se do seguinte modo:
 
 \begin{itemize}
+    \itemsep0cm
     \item[--] Para cada atributo não chave $R_n$ que depende funcionalmente num conjunto de atributos não-chave $N$, retirá-lo da relação inicial $R$ e criar uma nova relação com chave primária $N$ e com esquema $(N, R_n)$. Mais formalmente, ocorre a seguinte decomposição da relação inicial $R$: 
     \[
         R \gets \{R \setminus R_n,\:  (N, R_n)\}
@@ -2027,7 +2444,7 @@ Existem 2 questões a resolver nas transações:
 Existem, como tal, 3 caminhos possíveis para a conclusão de uma transação:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap4/caminhos_transacoes.png}
+    \includegraphics[scale = 0.4]{cap_transct/caminhos_transacoes.png}
     \caption{3 caminhos possíveis de uma transação}
 \end{figure}
 
@@ -2043,7 +2460,7 @@ As transações tem 4 grandes propriedades (\textbf{ACID}):
 Podemos esquematizar uma transação com o seguinte diagrama de estados:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap4/diagrama_estados_trans.png}
+    \includegraphics[scale = 0.4]{cap_transct/diagrama_estados_trans.png}
     \caption{Diagrama de estados de uma transação}
 \end{figure}
 
@@ -2123,7 +2540,7 @@ Definimos ainda sobre os níveis de isolamento em SQL:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap4/isolamento_transacoes.png}
+    \includegraphics[scale = 0.4]{cap_transct/isolamento_transacoes.png}
     \caption{Consistência e Isolamento em SQL}
 \end{figure}
 
