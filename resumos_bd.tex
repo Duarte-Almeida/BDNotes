@@ -347,13 +347,13 @@ FROM instructor;
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT DISTINCT dept_name
 FROM instructor;
-\end{lstlisting}\\
+\end{lstlisting}
 \textbf{3)} Seja a seguinte consulta: "Como seria a relação de instrutores com um aumento de 10\% no salário?". A cláusula \textbf{SELECT} permite-nos conter expressões aritméticas com os operadores $+, -, *$ e $/$. Logo:
 
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT ID, name, dept_name, salary * 1.1
 FROM instructor;
-\end{lstlisting}\\
+\end{lstlisting}
 \textbf{4)} Seja a seguinte consulta: "Encontra os names de todos os instrutores no departamento de Engenharia Informática que têm um um salário maior que 2000€.". A cláusula \textbf{WHERE} permite-nos selecionar apenas as linhas (dados da base de dados) na relação resultante da cláusula \textbf{FROM} que satisfazem um predicado especificado. Assim:
 
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
