@@ -9,10 +9,30 @@
 \usepackage{hyperref}
 \usepackage{interval}
 \usepackage{enumitem, xcolor}
+\usepackage{listingsutf8}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+\algdef{S}[FOR]{ForEach}[1]{\algorithmicforeach\ #1\ \algorithmicdo}
+\makeatletter
+\renewcommand{\ALG@name}{Algoritmo}
+
+\newtheorem{theorem}{Teorem}
+\newtheorem{lemma}{Lema}
 
 \usepackage{xcolor,listings}
 \usepackage{textcomp}
 \usepackage{color}
+
+\lstset{inputencoding=utf8/latin1}
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{HTML}{C42043}
@@ -196,6 +216,7 @@ O processo de conceção de um base de dados incide inicialmente no \textbf{dese
     \item[--] \textbf{DBA} (\textit{Database Administrators}), que concebem e mantêm a base de dados, em termos de desenho físico e lógico, segurança e configuração dos mecanismos de disponibilidade e recuperação. 
 \end{itemize}
 
+
 \chapter{SQL}
 
 \section{Visão Global da Linguagem \textit{Query} SQL}
@@ -273,8 +294,8 @@ CREATE TABLE r
 O SQL suporta uma variedade de \textbf{restrições de integridade}. Algumas delas são:
 \begin{itemize}
     \itemsep0cm
-    \item[--]\textbf{primary key} ($A_{j}_{1}, A_{j}_{2}, ..., A_{j}_{m}$): esta especificação diz que os atributos $A_{j}_{1}, A_{j}_{2}, ..., A_{j}_{m}$ formam a chave primária da relação - por definição estes devem ser \textbf{NOT NULL} e \textbf{UNIQUE}, i.e., nenhum tuplo pode ter um valor \textbf{null} como atributo de chave primária, e não existem 2 tuplos numa relação com atributos de chave primária iguais. Esta especificação é \textbf{opcional}.
-    \item[--]\textbf{foreign key} ($A_{k}_{1}, A_{k}_{2}, ..., A_{k}_{n}$) \textbf{references} \textit{s}: esta especificação diz que os valores dos atributos ($A_{k}_{1}, A_{k}_{2}, \\ ..., A_{k}_{n}$) para qualquer tuplo na relação devem corresponder aos atributos de chave primária de algum tuplo da relação \textit{s}.
+    \item[--]\textbf{primary key} ($A_{j_{1}}, A_{j_{2}}, ..., A_{j_{m}}$): esta especificação diz que os atributos $A_{j_{1}}, A_{j_{2}}, ..., A_{j_{m}}$ formam a chave primária da relação - por definição estes devem ser \textbf{NOT NULL} e \textbf{UNIQUE}, i.e., nenhum tuplo pode ter um valor \textbf{null} como atributo de chave primária, e não existem 2 tuplos numa relação com atributos de chave primária iguais. Esta especificação é \textbf{opcional}.
+    \item[--]\textbf{foreign key} ($A_{j_{1}}, A_{j_{1}}, ..., A_{j_{n}}$) \textbf{references} \textit{s}: esta especificação diz que os valores dos atributos ($A_{k_{1}}, A_{k_{2}}, \\ ..., A_{k_{1}}$) para qualquer tuplo na relação devem corresponder aos atributos de chave primária de algum tuplo da relação \textit{s}.
     \item[--]\textbf{not null}: esta especificação aplica-se a um atributo e especifica que o valor \textbf{null} não é permitido nele, i.e., excluir o valor \textbf{null} do domínio do mesmo.
 \end{itemize}
 O SQL previne qualquer atualização à base de dados que viole uma restrição de integridade.\\
@@ -341,26 +362,26 @@ CREATE TABLE teaches
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
 SELECT name
 FROM instructor;
-\end{lstlisting} \\
+\end{lstlisting} 
 \textbf{2)} Seja a seguinte consulta: "Encontra os nomes de departamento de todos os instrutores.". Dado que mais do que 1 instrutor pode pertencer ao mesmo departamento, o mesmo nome de departamento pode aparecer múltiplas vezes na relação \textit{instructor}. Como tal, interessa-nos forçar a eliminação de duplicados na relação resultante da consulta. Para tal:
 
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
 SELECT DISTINCT dept_name
 FROM instructor;
-\end{lstlisting}\\
+\end{lstlisting}
 \textbf{3)} Seja a seguinte consulta: "Como seria a relação de instrutores com um aumento de 10\% no salário?". A cláusula \textbf{SELECT} permite-nos conter expressões aritméticas com os operadores $+, -, *$ e $/$. Logo:
 
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
 SELECT ID, name, dept_name, salary * 1.1
 FROM instructor;
-\end{lstlisting}\\
+\end{lstlisting}
 \textbf{4)} Seja a seguinte consulta: "Encontra os names de todos os instrutores no departamento de Engenharia Informática que têm um um salário maior que 2000€.". A cláusula \textbf{WHERE} permite-nos selecionar apenas as linhas (dados da base de dados) na relação resultante da cláusula \textbf{FROM} que satisfazem um predicado especificado. Assim:
 
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
 SELECT name
 FROM instructor
 WHERE dept_name='Engenharia Informática' AND salary > 2000;
-\end{lstlisting} \\
+\end{lstlisting}
 De notar que o SQL permite o uso de conectores lógicos \textbf{and}, \textbf{or} e \textbf{not} na cláusula \textbf{WHERE}. Os operandos dos conectores lógicos podem ser expressões envolvendo operadores de comparação $<, \leq, >, \geq, =$ e $<>$, permitindo-nos comparar cadeias de caracteres e expressões aritméticas, bem como tipos especiais, como uma data.
 
 \subsection{Consultas em N Relações}
@@ -371,7 +392,7 @@ As consultas por vezes precisam de acesso a informação de múltiplas relaçõe
 SELECT name, instructor.dept_name, building
 FROM instructor, department
 WHERE instructor.dept_name = department.dept_name;
-\end{lstlisting} \\
+\end{lstlisting} 
 De notar que como o atributo \textit{dept\_name} ocorre em ambas as relações, o prefixo \textit{instructor.dept\_name} é necessário para tornar claro qual o atributo a que nos estamos a referir. Como \textit{name} e \textit{building} só aparecem em 1 das relações não é necessário o seu prefixo.
 
 Podemos assim definir o papel de cada cláusula:
@@ -738,7 +759,7 @@ WHERE semester=2 AND year=2017 AND
 \end{lstlisting}
 
 De notar que os operadores \textbf{IN} e \textbf{NOT IN} podem também ser usados em conjuntos enumerados. Por exemplo, \\
-\textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo nome não é "Mozart" nem "Einstein\"\". Temos:
+\textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo nome não é "Mozart" nem "Einstein"". Temos:
 \begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
 SELECT DISTINCT name
 FROM instructor
@@ -1251,6 +1272,304 @@ Em geral, no SQL uma vista diz-se \textbf{atualizável}, i.e., permite o uso dos
 \end{itemize}
 
 Contudo, as vistas podem também ser definidas com a opção \textbf{WITH CHECK} que aquando da tentativa de atualização da vista, se as restrições especificados na opção não forem verificadas, a atualização é descartada.
+
+\chapter{Teoria da Normalização}
+
+Na conceção do modelo E-A, há certas decisões que se tomam que têm um grande impacto tanto ao nível lógico como ao nível físico e que se só são detetadas no modelo Relacionalm, obrigando por vezes a um processo iterativo de sucessivas reformulações do modelo E-A. Essas qualidades prendem-se com questões de \textbf{redundância e independência de atributos} das relações.
+
+\section{Redundância e Independência de Atributos}
+
+Em geral, a \textbf{redundância} consiste na existência de atributos em relações que se podem derivar diretamente de outros da mesma relação. Muitas vezes, esta redundância encontra-se ligada à inexistência de \textbf{dependência entre atributos}. Por isso, para além de causar desperdício de memória física, pode ter alguns efeitos indesejáveis, que se explicam de seguida.
+
+\subsubsection{Anomalias de Inserção}
+
+Por anomalias de inserção entende-se a impossibilidade de inserir um \textit{item} numa base de dados sem inserir igualmente outro item \textbf{potencialmente independente/não relacionado} com este.
+\vspace{-0.3em}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{cap_norm/tabela_redundancia.png}
+\end{figure}
+
+Considere-se uma base de dados que só contém a relação $EMP\_DEPT(Ename, Ssn, Bdate, Dnumber, Dname, \\ Dmgr\_ssn)$ que indica que o funcionário com nome $Ename$, identificador $Ssn$, data de nascimento $Bdate$, morada $Address$ trabalha no departamento com número $Dnumber$, nome $Dname$ gerido pelo funcionário com identificador $Dmgr\_ssn$.\\
+A inserção de um novo funcionário obriga a inserção dos dados do departamento no qual trabalha, levando potencialmente a entradas a \textbf{NULL} (indesejáveis). Mais ainda, a criação de um departamento ainda sem funcionários faria com que a informação relativa ao funcionário trabalhador ficasse por preencher. Desta forma, o atributo $Ssn$ (chave primária da relação!) estaria a \textbf{NULL}.
+
+\subsubsection*{Anomalias de remoção}
+
+Por anomalias de remoção entende-se a impossibilidade de remover um \textit{item} numa base de dados sem remover igualmente outro item \textbf{potencialmente independente/não relacionado} com este. \\
+
+Considerando ainda a base de dados anterior, a remoção do de um trabalhador único num dado departamento apagaria por completo qualquer informação relativa ao mesmo.
+
+\subsubsection*{Anomalias de atualização}
+
+Por anomalias de atualização entende-se a impossibilidade de atualizar um \textit{item} numa base de dados sem atualizar igualmente outro item \textbf{potencialmente independente/não relacionado} com este. \\
+Por exemplo, a mudança do identificador do gestor de um dado departamento ($Dmgr\_ssn$) ter-se ia que fazer tantas vezes quantos funcionários trabalhassem nesse departamento.
+
+\subsubsection*{Anomalias de interrogação}
+
+Dado que se usa mais memória nas tabelas manipuladas, verifica-se um maior tempo nas operações I/O e maior consumo de largura de banda, tornando obrigatoriamente as \textit{queries} mais ineficientes.
+
+\section{Formas Normais}
+
+Por forma a caracterizar o grau de de redundância, independência dos factos e facilidade de interrogação, existem \textbf{Formas Normais} - classes de relações que obedecem a determinadas condições ($kNF$ designa a $k$-ésima Forma Normal e $BCNF$ a Forma Normal de Boyce-Codd (\textit{Boyce-Codd Normal Form})). Verificam-se as seguintes inclusões:
+
+\begin{equation}
+    1NF \subseteq 2NF \subseteq 3NF \subseteq BCNF \subseteq 4NF ... 
+\end{equation}
+
+A maioria destas formas utiliza \textbf{Dependências Funcionais} entre atributos de uma relação como métrica de redundância.\\
+Só serão abordadas as formas normais até à $BCNF$, pois esta é a última cujos critérios assentam sobre dependências funcionais.
+
+\section{Dependências Funcionais}
+
+\begin{definition}[Dependência Funcional - FD]
+    Uma Dependência Funcional $X\rightarrow Y$ entre dois subconjuntos de atributos $X$ e $Y$ dos atributos $R$ de uma relação $r$ estabelece que (dados dois tuplos $t_1$ e $t_2$ de $r$):
+    \begin{equation*}
+        \forall t_1, t_2 \in r, \;t_1[X] = t_2[X] \Rightarrow t_1[Y] = t_2[Y]
+    \end{equation*}
+    Mais intuitivamente, os atributos de $Y$  \textbf{são função} de $X$. Diz-se que $X$ determina $Y$ ou que $X$ \textbf{determina funcionalmente} $Y$, sendo que $X$ é \textit{determinante} e $Y$ \textit{dependente}.
+\end{definition} 
+
+De notar que as dependências funcionais são propriedades um esquema de relação e não de um conjunto particular de registos. Desta forma, \textbf{é impossível} inferir dependências funcionais a partir de um conjunto de regitos, sendo unicamente possível provar que uma dada $FD$ não existe através de um contraexemplo desse mesmo conjunto de registos (e.g., a existência de dois conjuntos de atributos $Y$ associados a um mesmo conjunto de atributos $X$).
+
+\subsection{Propriedades}
+
+As seguintes propriedades designam-se de \textbf{Axiomas de Armstrong}:
+\vspace{-0.3em}
+\begin{align*}
+    Y \subseteq X \Rightarrow X \rightarrow Y &&\text{(reflexividade)} \\
+    X \rightarrow Y \Rightarrow XZ \rightarrow YZ, \: \forall Z  &&\text{(aumentação)} \\
+    X \rightarrow Y \wedge Y \rightarrow Z \Rightarrow X \rightarrow Z &&\text{(transitividade)}
+\end{align*}
+
+\pagebreak
+E as seguintes propriedades podem-se derivar dos axiomas:
+
+\vspace{-0.3em}
+\begin{align*}
+    X \rightarrow X &&\text{(reflexividade)} \\
+    X \rightarrow YZ \Rightarrow X \rightarrow Y \wedge X \rightarrow Z &&\text{(decomposição)} \\
+    X \rightarrow Y \wedge X \rightarrow Z \Rightarrow X \rightarrow YZ &&\text{(união)} \\
+    X \rightarrow Y \wedge A \rightarrow B \Rightarrow XA \rightarrow YB &&\text{(composição)} \\
+    X \rightarrow Y \wedge YZ \rightarrow W \Rightarrow X \rightarrow W &&\text{(pseudo-transitividade)}
+\end{align*}
+
+\subsection{\textit{Attribute Closure}}
+
+\begin{definition}[Fecho de um conjunto de atributos]
+    Seja $X$ um subconjunto de atributos de um esquema relacional com um conjunto de dependências funcionais $F$. O fecho de $X$, $X^{+}$, consiste em todos os atributos que que \textbf{dependem funcionalmente} de $X$, isto é:
+    \begin{equation*}
+        X^{+} = \{ Z \in F: F \models \: X \rightarrow Z \}
+    \end{equation*}
+    i.e., os conjuntos dos atributos $Z$ de $F$ tais que a dependência $X \rightarrow Z$ pode ser inferida a partir dos axiomas de Armstrong e propriedades derivadas.
+\end{definition}
+\vspace{-0.3em}
+\begin{algorithm}
+    \caption{Algoritmo para calcular o \textit{attribute closure}}\label{alg:cap}
+    \begin{algorithmic}
+    \State $X^{+} \gets X$
+    \Repeat
+        \State $X_{old} \gets X^{+}$
+        \ForEach {$Y \rightarrow Z \in F $}
+            \If {$X^{+} \supseteq Y$}
+                \State
+                $X^{+} \gets  X^{+} \cup \{Z\}$
+            \EndIf
+        \EndFor
+    \Until{$X^{+} = X_{old}$}
+    \end{algorithmic}
+ \end{algorithm}
+
+Podemos então revisitar alguns conceitos à luz do \textit{attribute closure}.
+
+\begin{definition} [Super-chave, chave candidate, chave primária]
+    Dada uma relação $r$ com esquema $R$, e um subconjunto $K \subseteq R$, tem-se que:
+    \begin{enumerate}
+        \item $K$ é uma \textbf{super-chave} de $r(R)$ se $K \rightarrow R$
+        \item $K$ é uma \textbf{chave candidata} de $r(R)$ se e só se  $K \rightarrow R \; \wedge \; \nexists(\alpha \subset K): \alpha \rightarrow R$ (i.e., uma super-chave minimal: nenhum subconjunto de $K$ determina funcionalmente $R$)
+    \end{enumerate}
+    Sendo que uma \textbf{chave primária} é uma qualquer chave escolhida do conjunto de chaves candididates de $R$.
+\end{definition}
+
+O seguinte conceito também revelar-se-á útil.
+
+\begin{definition} [Dependência total]
+    Sejam $X$ e $Y$ dois quaisquer conjuntos de atributos tais que $X \rightarrow Y$, diz se que $Y$ é \textbf{totalmente dependente} em $X$ se nenhum subconjunto próprio de $X$ determina funcionalmente $Y$, i.e., $\nexists(\alpha \subset X): \alpha \rightarrow Y$.
+\end{definition}
+
+\textit{Nota: uma chave candidata é uma super-chave na qual $R$ depende totalmente.}
+
+\section{Descrição das Formas Normais}
+
+\subsection{1ª Forma Normal}
+
+\subsubsection*{Definição}
+
+Uma relação encontra-se na 1ª forma normal se e só se:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] o domínio de todos os atributos contém apenas valores \textit{atómicos} (i.e., indivisíveis);
+    \item[--] o valor num dado tuplo de uma relação tem de conter \textbf{um único valor} do domínio desse atributo. 
+\end{itemize}
+
+\subsubsection*{Normalização-$1NF$}
+
+Uma relação que não se encontra na $1NF$ por apresentar domínios com valores não-atómicos pode ser normalizada ao transferir os campos do tuplo para uma nova relação, propagando a chave primária. Considere-se o seguinte exemplo com o atributo $Proj$ que é na verdade uma relação $Proj(Pnumber, Hours)$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale = 0.6]{cap_norm/1nf_1.png}
+    \hspace*{1em}
+    \includegraphics[scale = 0.6]{cap_norm/1nf_2.png}
+\end{figure}
+
+Se relação que não se encontrar na $1NF$ por apresentar atributos com listas de valores, a normalização ocorre fazendo um registo para cada valor do atributo composto, passando a chave primária do registo a incorporar o novo atributo:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale = 0.4]{cap_norm/1nf_3.png}
+\end{figure}
+
+\textit{Nota: uma relação que não se encontra na 1º forma normal não pode sequer ser considerada uma relação.}
+
+\subsection{2ª Forma Normal}
+
+\subsubsection*{Definição}
+
+Uma relação encontra-se na 2ª forma normal se e só se se encontrar na 1º forma normal e \textbf{todo o atributo não chave} (i.e., que não participa em nenhuma super-chave) é \textbf{completamente dependente} em \textbf{atributos chave} (i.e., depende sempre totalmente de \textit{qualquer chave}).
+
+\subsubsection*{Normalização-$2NF$}
+
+A conversão de uma relação na 1ª forma normal para a 2ª forma normal faz-se do seguinte modo:
+
+\begin{itemize}
+    \item[--] Para cada atributo não chave $R_n$ que \textbf{depende parcialmente} de um subconjunto de atributos chave de uma chave $K$, $S \subseteq K$, retirá-lo da relação inicial $R$ e criar uma nova relação com chave primária $S$ e com esquema $(S, R_n)$. Mais formalmente, ocorre a seguinte decomposição da relação inicial $R$: 
+    \[
+        R \gets \{R \setminus R_n,\:  (S, R_n)\}
+    \]
+    afetando-se a cada relação resultante as FD's com cujos atributos constam nas relações resultantes.
+\end{itemize}
+
+Por exemplo, para a relação $R(\underline{A, B}, C, D)$ com chave primária $\{A, B\}$ e com dependências $AB \rightarrow C$ e $A \rightarrow D$, tem-se que $D$, não chave, depende parcialmente de uma chave (neste caso, da chave primária), dado que $A \rightarrow D$ e $A \subset \{A, D\}$. Assim, $R$ decompõe-se em duas relações: $R_1(\underline{A, B}, C)$, com dependência $AB \rightarrow C$, e $R_2(\underline{A}, D)$, om dependência $A \rightarrow D$.\\ 
+\vspace*{0.3em}
+\textit{Nota: Uma relação na 1NF cujas chaves possuem um só atributo encontram-se trivialmente na 2NF.}
+
+\subsection{3ª Forma Normal}
+
+\subsubsection*{Definição}
+
+Uma relação encontra-se na 3ª forma normal se e só se se encontrar na 2º forma normal e se e só se \textbf{não há dependências entre atributos não-chave}.
+
+\subsubsection*{Normalização-$3NF$}
+
+A conversão de uma relação na 2ª forma normal para a 3ª forma normal faz-se do seguinte modo:
+
+\begin{itemize}
+    \item[--] Para cada atributo não chave $R_n$ que depende funcionalmente num conjunto de atributos não-chave $N$, retirá-lo da relação inicial $R$ e criar uma nova relação com chave primária $N$ e com esquema $(N, R_n)$. Mais formalmente, ocorre a seguinte decomposição da relação inicial $R$: 
+    \[
+        R \gets \{R \setminus R_n,\:  (N, R_n)\}
+    \]
+    afetando-se a cada relação resultante as FD's com cujos atributos constam nas relações resultantes.
+\end{itemize}
+
+Por exemplo, a relação $R(\underline{A}, B, C)$ com chave primária $A$ e com dependências $B \rightarrow C$ tem-se que $C$, não chave, depende de $B$, um atributo não chave. Assim, $R$ decompõe-se em duas relações $R_1(\underline{B}, C)$, com a FD $B \rightarrow C$, e $R_2(\underline{A}, B)$, com a FD $A \rightarrow B$.
+
+\vspace*{0.3em}
+\textit{Nota: Uma relação na 2NF que só possua um atributo naõ-chave encontra-se trivialmente na 3NF.}
+
+\subsection{Forma Normal de \textit{Boyce-Codd}}
+
+\subsubsection*{Definição}
+
+Uma relação encontra-se na Forma Normal de \textit{Boyce-Codd} se e só se todo e qualquer atributo é totalmente dependente numa chave candidata:
+\[
+    \forall X \rightarrow Y, X \: \text{é chave candidata}
+\]
+excluindo obviamente as denominadas \textit{dependências triviais}, i.e., da forma $X \rightarrow Y$, para algum $Y \subseteq X$. \\
+Quando uma relaçaõ está na $BCNF$, então \textbf{não apresenta qualquer redundância} detedada por dependências funcionais.\\
+Antes de expormos a passagem para a $BCNF$, vamos introduzir alguns conceitos relativos à decomposição de relações.
+
+\section{Decomposição de Relações}
+
+Para além das formas normais, é desejável que as relações das bases de dados apresentem propriedades relativas a interrelações entre estas, propriedades estas que devem ser preservadas na decomposição de relações que permite a passagem para formas normais de grau superior. \\
+Dado um esquema de relação $R = (A_1, A_2, ..., A_n)$, pretende-se obter uma decomposição $D = \{ R_1, ..., R_m\}$ que tenha as seguintes propriedades:
+
+\subsubsection*{Propriedade da Preservação de Atributos}
+
+Pretende-se que cada atributo $A_j$ figure em pelo menos uma relação $R_i$, i.e.:
+\vspace{-0.3em}
+\[
+    \bigcup_1^{m} R_i = R
+\]
+
+\subsubsection*{Propriedade da Preservação de Dependências}
+
+Dado que cada dependência representa um constragimento sobre a base de dados, convém preservá-las numa decomposição, i.e., para toda a dependência funcional, tem de existir \textbf{pelo menos uma relação} que contenha todos os atributos dessa dependência (assim, não há perda de dependências ao afetá-las a relações recém criadas - ver exemplos acima). \\
+Mais formalmente, dado um conjunto de dependências $F$ de $R$, a projeção de $F$ em $R_i$, designada de $\pi_{R_i}(F)$, onde $R_i \subset R$, consiste no conjunto de dependências $X \rightarrow Y$ em $F^{+}$ tais que $X \cup Y \subseteq R_i$ (onde $F^{+}$ designa o \textit{fecho} de $F$, definido de forma análoga ao \textit{attribute closure}, sendo o conjunto de FD's deriváveis a partir das FD's de $F$). A esta operação dávamos-lhe informalmente o nome de afetação.\\
+Diz-se que $D = \{ R_1, ..., R_m\}$ preserva as dependências em relação a $F$ se a união das projeções de $F$ em cada $R_i \in D$ é equivalente a $F$, i.e., $( \pi_{R_1}(F) \cup  ... \cup \pi_{R_m}(F))^{+} = F^{+}$
+
+\subsubsection*{Propriedade \textit{Lossless}}
+
+Informalmente, diz-se que uma decomposição é \textit{lossless} (\textit{não-aditiva}) se a aplicação de um \textit{natural join} às relações relativas à decomposição resulta \textbf{exatamente} na relação inicial, não criando nenhum registo a mais.\\
+Mais formalmente, uma decomposição $D = \{ R_1, ..., R_m\}$ de $R$ diz-se \textit{lossless} em relação a um conjunto de FD's $F$ de $R$ se, para qualquer instância de relação $r$ com esquema $R$, se tem  $( \pi_{R_1}(r) \bowtie  ... \bowtie \pi_{R_m}(r))^{+} = r$, onde $\pi$ designa o operador convencial de projeção da álgebra relacional.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale = 0.75]{cap_norm/lossy.png}
+    \caption{Decomposição \textit{lossy}}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale = 0.75]{cap_norm/lossless.png}
+    \caption{Decomposição \textit{lossless}}
+\end{figure}
+
+\begin{lemma} [Sucessão de decomposições \textit{lossless}]
+    Se decomposições $D = \{R_1, R_2, ..., R_m\}$ e $D_i = \{Q_1, Q_2, ..., Q_m\}$ são \textit{lossless}, então a decomposição $D_2 = \{ R_1, R_2, ..., R_{i - 1}, Q_1, Q_2, ..., Q_m, R_{i + 1}, ...,  R_m\}$ é também \textit{lossless}.
+\end{lemma}
+
+\begin{theorem} [Teorema de \textit{Heath}]
+    Uma decomposição $D = \{R_1, R_2\}$ é \textit{lossless} se pelo menos uma das duas dependências existir:
+    \begin{enumerate}
+        \item $(R_1 \cap R_2) \rightarrow (R_1 \setminus R_2)$
+        \item  $(R_1 \cap R_2) \rightarrow (R_2 \setminus R_1)$
+    \end{enumerate}
+\end{theorem}
+
+\textit{Nota: Mesmo que se consiga uma decomposição lossless, nem sempre se consegue que as decomposições preservem dependências. Contudo, não se considera que tal seja de grande gravidade, pois pode se verificar a validade das dependências recorrendo a operações de join em troca de um maior esforço computacional. Assim, o critério a ter na escolha de uma decomposição é: dada uma decomposição obrigatoriamente lossless, escolhar aquela que perde o menos número de dependências.} \\
+
+\textit{Nota: Pode-se verificar que as decomposições feitas na normalização-1nf, normalização-2nf e normalização-3nf são lossless - basta atentar na forma da decomposição resultante e aplicar alguma álgebra de conjuntos. Contudo, não é garantido que as mesmas preservem todas as dependências.}
+
+\section{Conversão para a \textit{BCNF}}
+
+O seguinte algoritmo garante a conversão de uma \textbf{qualquer relação $R$} (mesmo sem estar na $2NF$) para a $BCNF$ através de uma decomposição $D$ \textit{lossless}.
+
+\begin{algorithm}
+    \caption{Algoritmo de conversão para a $BCNF$}\label{alg:cap}
+    \begin{algorithmic}
+    \State $D \gets \{R\}$
+    \While{$\exists S \in D \: \text{not in BCNF}$}
+        \State $Q \gets \{S \in D : \: S \: \text{not in BCNF}\}$
+        \State $(X \rightarrow Y) \gets \{(X \rightarrow Y) \in Q : \: X \rightarrow Y \: \text{violates BCNF}\}$
+        \State $D \gets (D \setminus Q) \cup \{(Q \setminus Y), (X \cup Y)\}$
+    \EndWhile
+    \end{algorithmic}
+ \end{algorithm}
+
+ A última instrução do bloco \textit{while} corresponde a uma decomposição \textit{lossless} pelo teorema de \textit{Heath}: $Q \gets \{(Q \setminus Y), (X \cup Y)\}$ . A propriedade da sucessão de decomposições \textit{lossless} juntamente com o facto de que cada iteração diminui em pelo menos um atributo duas relações de $D$ e que, no limite, relações com apenas 2 atributos não geram quaisquer redundância, tem-se que o algoritmo garante a conversão para a $BCNF$ em tempo $O(|R|)$. \\
+
+ \textit{Nota: Existe um algoritmo que gera uma decomposição tanto lossless como preservadora de dependências para conversão para a 3NF}
+
+
+
+
+
+
+
+
+
+
+
 
 \chapter{Transações}
 \section{Introdução às Transações}
