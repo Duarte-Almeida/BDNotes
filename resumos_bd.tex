@@ -338,25 +338,25 @@ CREATE TABLE teaches
 \subsection{Consultas em 1 Relação}
 \textbf{1)} Seja a seguinte consulta: "Encontra os nomes de todos os instrutores.". Os nomes dos instrutores podem ser encontrados na relação \textit{instructor}, pelo que pomos isso na cláusula \textbf{FROM}. O nome do instrutor aparece no atributo \textit{name}, colocando isso na cláusula \textbf{SELECT}.
 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor;
 \end{lstlisting} \\
 \textbf{2)} Seja a seguinte consulta: "Encontra os nomes de departamento de todos os instrutores.". Dado que mais do que 1 instrutor pode pertencer ao mesmo departamento, o mesmo nome de departamento pode aparecer múltiplas vezes na relação \textit{instructor}. Como tal, interessa-nos forçar a eliminação de duplicados na relação resultante da consulta. Para tal:
 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT DISTINCT dept_name
 FROM instructor;
 \end{lstlisting}\\
 \textbf{3)} Seja a seguinte consulta: "Como seria a relação de instrutores com um aumento de 10\% no salário?". A cláusula \textbf{SELECT} permite-nos conter expressões aritméticas com os operadores $+, -, *$ e $/$. Logo:
 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT ID, name, dept_name, salary * 1.1
 FROM instructor;
 \end{lstlisting}\\
 \textbf{4)} Seja a seguinte consulta: "Encontra os names de todos os instrutores no departamento de Engenharia Informática que têm um um salário maior que 2000€.". A cláusula \textbf{WHERE} permite-nos selecionar apenas as linhas (dados da base de dados) na relação resultante da cláusula \textbf{FROM} que satisfazem um predicado especificado. Assim:
 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor
 WHERE dept_name='Engenharia Informática' AND salary > 2000;
@@ -367,7 +367,7 @@ De notar que o SQL permite o uso de conectores lógicos \textbf{and}, \textbf{or
 As consultas por vezes precisam de acesso a informação de múltiplas relações. \\
 \textbf{1)} Seja a seguinte consulta: "Recolha o nome de todos os instrutores, bem como o seu nome de departamento e o nome do edifício do departamento.". Analisando o esquema da relação \textit{instructor}, percebemos que podemos obter o nome do departamento do atributo \textit{dept\_name}, mas o nome do edifício do departamento está presenta no atributo \textit{building} da relação \textit{department}. Para responder à consulta, cada tuplo na relação \textit{instructor} deve ser correspondida a um tuplo da relação \textit{department} onde os valores \textit{dept\_name} correspondam. Assim, em SQL para respondermos a esta consulta, listamos as relações necessárias na cláusula \textbf{FROM} e especificamos a condição de correspondência de valores de atributos na cláusula \textbf{WHERE}. Assim:
 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name, instructor.dept_name, building
 FROM instructor, department
 WHERE instructor.dept_name = department.dept_name;
@@ -383,7 +383,7 @@ Podemos assim definir o papel de cada cláusula:
 \end{itemize}
 
 Uma consulta SQL típica tem a seguinte forma:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT A_1, A_2, ..., A_n
 FROM r_1, r_2, ..., r_m
 WHERE P;
@@ -419,14 +419,14 @@ O produto Cartesiano resultante combina tuplos que não têm qualquer tipo de re
 
 A cláusula \textbf{WHERE} é usada para restringir as combinações criadas pelo produto Cartesiano ao essencial.
 \textbf{2)} Seja a seguinte consulta: "Lista todos os instrutores bem como o curso que estes lecionam.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
     SELECT name, course_id
     FROM instructor, teaches
     WHERE instructor.ID = teaches.ID;
 \end{lstlisting}
 
 \textbf{3)} Seja a seguinte consulta: "Lista todos os cursos que os instrutores do departamento de Engenharia Informática lecionam.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
     SELECT name, course_id
     FROM instructor, teaches
     WHERE instructor.ID = teaches.ID AND dept_name='Engenharia Informatica';
@@ -448,21 +448,21 @@ Porém, nem sempre podemos derivar nomes desta maneira: duas relações na cláu
 A cláusula \textbf{AS} pode aparecer quer nas cláusulas \textbf{SELECT}, quer nas \textbf{FROM}.
 
 \textbf{1)} Se quisermos substituir um nome de atributo por algo mais específico:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name AS instructor_name, course_id
 FROM instructor, teaches
 WHERE instructor.ID = teaches.ID;
 \end{lstlisting}
 
 \textbf{2)} Seja a seguinte consulta: "Para todos os instrutores na universidade que ensinam um curso, encontra os nomes e o ID do curso que lecionam.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT T.name, S.course_id
 FROM instructor AS T, teaches AS S
 WHERE T.ID = S.ID;
 \end{lstlisting}
 
 \textbf{3)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo salário é maior que pelo menos 1 instrutor no departamento de Biologia.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT DISTINCT T.name,
 FROM instructor AS T, instructor AS S
 WHERE T.salary > S.salary AND S.dept_name='Biologia';
@@ -495,7 +495,7 @@ Alguns exemplos que ilustram a correspondência de padrões em SQL:
 \end{itemize}
 
 \textbf{1)} Seja a seguinte consulta: "Encontra os nomes de todos os departamentos cujos edifícios têm o nome 'Watson'". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name
 FROM department
 WHERE building LIKE '%Watson%';
@@ -510,7 +510,7 @@ O SQL permite o uso de um caracter \textit{escape} que antecede qualquer caracte
 
 \subsection{Especificação de Atributo na cláusula SELECT}
 O símbolo do asterisco (\textbf{*}) pode ser usado na cláusula \textbf{SELECT} para denotar todos os atributos. Podemos especificar então uma consulta com 2 relações em que queiramos todos os atributos de apenas 1 das relações da seguinte maneira:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT instructor.*
 FROM instructor, teaches
 WHERE instructor.ID = teaches.ID;
@@ -520,7 +520,7 @@ WHERE instructor.ID = teaches.ID;
 O SQL oferece ao utilizador algum controlo sobre a ordem na qual os tuplos numa relação são dispostos - a cláusula \textbf{ORDER BY} causa os tuplos no resultado da query a seguirem uma dada relação de ordenação. 
 
 \textbf{1)} Seja a seguinte consulta: "Liste todos os instrutores que trabalham no Departamento de Física por ordem alfabética.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor
 WHERE dept_name = 'Física'
@@ -530,7 +530,7 @@ ORDER BY name;
 Se tivermos vários nomes de atributos na cláusula \textbf{ORDER BY} este segue o primeiro como principal critério de ordenação e os subsequentes como critério de desempate.
 
 \textbf{2)} Seja a seguinte consulta: "Liste a relação \textit{instructor} por ordem descendente de salário, e em caso de empate, por ordem alfabética.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT *
 FROM instructor
 ORDER BY salary DESC, name ASC;
@@ -540,7 +540,7 @@ ORDER BY salary DESC, name ASC;
 O SQL inclui um operador \textbf{BETWEEN} para simplificar enquadramentos de valores.
 
 \textbf{1)} Seja a seguinte consulta: "Liste todos os instrutores cujos salários estão entre 2000€ e 3000€.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor
 WHERE salary BETWEEN 2000 AND 3000;
@@ -551,13 +551,13 @@ Similarmente, podemos usar o operador de comparação \textbf{NOT BETWEEN}.
 O SQL permite-nos ainda usar a notação ($v_{1}, v_{2}, ..., v_{n}$) para denotar um tuplo de aridade $n$ contendo os valores $v_1, v_2, ..., v_n$ - esta notação é designada \textbf{\textit{row constructor}}. Por exemplo, $(a_1, a_2) \leq (b_1, b_2)$ só é verdade sse $a_1 \leq b_1$ e $a_2 \leq b_2$.
 
 Podemos então reescrever este query
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name, course_id
 FROM instructor, teaches
 WHERE instructor.ID = teaches.ID AND dept_name = 'Biologia';
 \end{lstlisting}
 usando a notação do \textbf{\textit{row constructor}}:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name, course_id
 FROM instructor, teaches
 WHERE (instructor.ID, dept_name) = (teaches.ID, 'Biologia');
@@ -568,7 +568,7 @@ As operações SQL \textbf{union}, \textbf{intersect} e \textbf{except} operam e
 
 \subsubsection{Operador de União}
 \textbf{1)} Seja a seguinte consulta: "Selecione todos os ID's de cursos lecionados no 2º semestre do ano de 2017 e 1ºsemestre do ano de 2018.". Podemos decompor isto:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- O conjunto de cursos lecionados no 2 semestre de 2017
 SELECT course_id
 FROM section
@@ -623,7 +623,7 @@ Se o predicado da cláusula \textbf{WHERE} avalia a \textbf{false} ou \textbf{un
 O SQL usa a palavra-especial \textbf{NULL} num predicado para testar para um valor null.
 
 \textbf{1)} Seja a seguinte consulta: "Liste todos os instrutores que não têm um salário especificado.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor
 WHERE salary IS NULL;
@@ -644,7 +644,7 @@ As \textbf{funções de agregação} são funções que tomam uma coleção de v
 
 \subsection{Agregação Básica}
 \textbf{1)} Seja a seguinte consulta: "Encontra o salário médio dos instrutores no departamento de Engenharia Informática.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT AVG(salary)
 FROM instructor
 WHERE dept_name='Engenharia Informatica';
@@ -656,7 +656,7 @@ WHERE dept_name='Engenharia Informatica';
 \end{lstlisting}
 
 \textbf{2)} Seja a seguinte consulta: "Encontra o número total de instrutores que lecionaram um curso no 1º semestre de 2018.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- O DISTINCT aqui permite que um instrutor tenha lecionado mais que 1 curso, mas ser contado apenas 1 vez
 SELECT COUNT(DISTINCT id)
 FROM teaches
@@ -664,7 +664,7 @@ WHERE semester = 1 AND year = 2018;
 \end{lstlisting}
 
 \textbf{3)} Seja a seguinte consulta: "Quantas entradas estão na relação \textit{course}?". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT COUNT(*)
 FROM course;
 \end{lstlisting}
@@ -675,14 +675,14 @@ Existem circunstâncias em que queremos aplicar a função de agregação não s
 
 Os atributos dados na cláusula \textbf{GROUP BY} são usados para formar grupos. Tuplos com o mesmo valor em todos os atributos na cláusula \textbf{GROUP BY} são postos num grupo.
 \textbf{1)} Seja a seguinte consulta: "Encontra o salário médio para cada departamento.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name, AVG(salary) AS avg_salary
 FROM instructor
 GROUP by dept_name;
 \end{lstlisting}
 
 \textbf{2)} Seja a seguinte consulta: "Encontra o número de instrutores em cada departamento que lecionaram um curso no 1º semestre de 2018.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name, COUNT(DISTINCT id) AS instr_count
 FROM instructor, teaches
 WHERE (instructor.ID, semester, year) = (teaches.ID, 1, 2018)
@@ -695,7 +695,7 @@ GROUP BY dept_name;
 Quando queremos aplicar condições que se aplicam a \textbf{grupos} e não tuplos, usamos a cláusula \textbf{HAVING}. Recordemos que os grupos são formados através da cláusula \textbf{GROUP BY}.
 
 \textbf{1)} Seja a seguinte consulta: "Encontra o salário médio dos instrutores nos departamentos cujo salário médio é maior que 2500€.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name, AVG(salary) AS avg_salary
 FROM instructor
 GROUP BY dept_name
@@ -704,7 +704,7 @@ HAVING AVG(salary) > 42000;
 É importantíssimo notar que o SQL aplica os predicados na cláusula \textbf{HAVING} \textbf{após os grupos se formarem}, pelo que funções de agregação podem ser usadas na cláusula \textbf{HAVING}.
 
 \textbf{2)} Seja a seguinte consulta: "Para cada curso oferecido em 2017, encontra a média de créditos totais (tot\_cred) de todos os estudantes inscritos na secção, se a secção tem pelo menos 2 estudantes.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT course_id, semester, year, sec_id, AVG(tot_cred)
 FROM student, takes
 WHERE (student.ID, year) = (takes.ID, 2017)
@@ -719,7 +719,7 @@ O tipo de dados Booleano pode assumir valores \textbf{true}, \textbf{false} e \t
 
 \section{Sub-Consultas Aninhadas}
 O SQL fornece um mecanismo de aninhamento de sub-consultas.
-\begin{definition}
+\begin{definition}[Sub-Consulta]
     Uma sub-consulta é uma expressão \textbf{SELECT-FROM-WHERE} que está aninhada noutra consulta.
 \end{definition}
 As sub-consultas são geralmente usadas para executar testes em pertença de conjuntos, comparações entre conjuntos e determinação de cardinalidade de conjuntos.
@@ -728,7 +728,7 @@ As sub-consultas são geralmente usadas para executar testes em pertença de con
 O SQL permite testar pertença de tuplos numa relação. O conector de palavra-chave \textbf{IN} testa por pertença de conjuntos, onde o conjunto é uma coleção de valores produzida pela cláusula \textbf{SELECT}. O conector \textbf{NOT IN} testa a abstenção de pertença.
 
 \textbf{1)} Seja de novo a seguinte consulta: "Selecione todos os ID's de cursos lecionados no 2º semestre do ano de 2017 e 1ºsemestre do ano de 2018.". Podemos reescrever a consulta do seguinte modo:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT DISTINCT course_id
 FROM section
 WHERE semester=2 AND year=2017 AND
@@ -739,7 +739,7 @@ WHERE semester=2 AND year=2017 AND
 
 De notar que os operadores \textbf{IN} e \textbf{NOT IN} podem também ser usados em conjuntos enumerados. Por exemplo, \\
 \textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo nome não é "Mozart" nem "Einstein\"\". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT DISTINCT name
 FROM instructor
 WHERE name NOT IN ('Mozart', 'Einstein');
@@ -747,7 +747,7 @@ WHERE name NOT IN ('Mozart', 'Einstein');
 
 \subsection{Comparação de Conjuntos}
 \textbf{1)} Seja de novo a seguinte consulta: "Encontra o nome de todos os instrutores cujo salário é maior que pelo menos 1 instrutor no departamento de Biologia.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor 
 WHERE salary > SOME (SELECT salary
@@ -758,7 +758,7 @@ WHERE salary > SOME (SELECT salary
 O operador $> SOME$ na cláusula \textbf{WHERE} no \textbf{SELECT} exterior é verdadeiro se o valor de \textit{salary} do tuplo é maior que pelo menos um membro do conjunto de todos os valores de salários de instrutores em Biologia.
 
 \textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores que têm um salário maior do que todos os instrutores no departamento de Biologia.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor 
 WHERE salary > ALL (SELECT salary
@@ -767,7 +767,7 @@ WHERE salary > ALL (SELECT salary
 \end{lstlisting}
 
 \textbf{3)} Seja a seguinte consulta: "Encontra os departamentos que têm o maior salário médio.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name
 FROM instructor 
 GROUP BY dept_name
@@ -780,7 +780,7 @@ HAVING AVG(salary) >= ALL (SELECT AVG(salary)
 O SQL inclui um elemento para testar se uma sub-consulta tem algum tuplo no seu resultado - palavra-chave \textbf{EXISTS}. É um booleano que retorna o valor \textbf{true} se a sub-consulta de argumento não é vazia.
 
 \textbf{1)} Seja de novo a seguinte consulta: "Selecione todos os ID's de cursos lecionados no 2º semestre do ano de 2017 e 1ºsemestre do ano de 2018.". Temos agora:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT course_id
 FROM section AS S 
 WHERE semester=2 AND year=2017 AND
@@ -791,7 +791,7 @@ WHERE semester=2 AND year=2017 AND
 Isto é a primeira vez que uma consulta ilustra o funcionamento de um \textbf{nome de correlação} de uma consulta externa (\textbf{S}) é usado numa sub-consulta na cláusula \textbf{WHERE}. Uma sub-consulta que usa o nome de correlação de uma consulta externa é chamada uma \textbf{sub-consulta correlacionada}.
 
 \textbf{2)} Seja a seguinte consulta: "Encontra todos os alunos que tiraram cursos oferecidos pelo departamento de Biologia.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT S.ID, S.name
 FROM student AS S 
 WHERE NOT EXISTS ((SELECT course_id
@@ -816,7 +816,7 @@ WHERE S.ID=T.ID
 O SQL inclui uma função Booleana para testar se uma sub-consulta tem tuplos duplicados no seu resultado - o construtor \textbf{UNIQUE} retorna o valor \textbf{true} se a sub-consulta não contém tuplos duplicados.
 
 \textbf{1)} Seja a seguinte consulta: "Encontra todos os cursos que foram oferecidos no máximo 1 vez em 2017.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT T.course_id
 FROM course AS T
 WHERE UNIQUE (SELECT R.course_id
@@ -835,7 +835,7 @@ WHERE 1 >= (SELECT COUNT(R.course_id)
 O SQL permite uma sub-consulta ser usada como expressão na cláusula \textbf{FROM}. O conceito-chave aplicado aqui é que a expressão \textbf{SELECT-FROM-WHERE} retorna uma relação como resultado, e, como tal, pode ser inserido noutro \textbf{SELECT-FROM-WHERE} em qualquer lado que uma relação possa aparecer.
 
 \textbf{1)} Seja a seguinte consulta: "Encontra o salário médio dos instrutores cujos departamentos têm um salário médio maior que 2500€.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name, avg_salary
 FROM (SELECT dept_name, AVG(salary) as avg_salary
       FROM instructor
@@ -846,7 +846,7 @@ WHERE avg_salary > 42000;
 De notar que no \textit{PostgreSQL} (SGBD da cadeira) é necessário que cada relação de sub-consulta numa cláusula \textbf{FROM} lhe seja atribuído um nome, mesmo que nunca seja referenciado - neste caso usámos o identificador \textbf{dept\_avg}.
 
 \textbf{2)} Seja a seguinte consulta: "Encontra o máximo de salário que cada departamento com todos os seus instrutores tem.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT MAX(tot_salary)
 FROM (SELECT dept_name, SUM(salary)
       FROM instructor
@@ -857,7 +857,7 @@ FROM (SELECT dept_name, SUM(salary)
 A cláusula \textbf{WITH} fornece uma maneira de definir temporariamente uma relação cuja definição só está disponível à consulta na qual a cláusula \textbf{WITH} ocorre.
 
 \textbf{1)} Seja a seguinte consulta: "Encontra os departamentos com maior salário.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 WITH max_budget(value) AS
     (SELECT MAX(budget)
      FROM departament)
@@ -867,7 +867,7 @@ WHERE department.budget = max_budget.value;
 \end{lstlisting}
 
 \textbf{2)} Seja a seguinte consulta: "Encontra os departamentos cujo salário total é maior do que a média de salário total em todos os departamentos.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 WITH dept_total(dept_name, value) AS
     (SELECT dept_name, SUM(salary)
      FROM instructor
@@ -884,7 +884,7 @@ WHERE dept_total.value > dept_total_avg.value;
 O SQL permite que sub-consultas ocorram sempre que uma expressão que retorna um valor é permitida, desde que a sub-consulta retorna apenas um tuplo contendo um único atributo - tais sub-consultas são designadas \textbf{sub-consultas escalares}.
 
 \textbf{1)} Seja a seguinte consulta: "Lista todos os departamentos bem como o número de instrutores em cada departamento.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name, 
        (SELECT COUNT(*)
         FROM instructor
@@ -898,7 +898,7 @@ Vejamos agora como adicionar, remover ou mudar informação com o SQL.
 \subsection{Remoção}
 Um pedido \textbf{DELETE} é expresso da mesma maneira que uma consulta - só podemos \textbf{apagar tuplos}; não podemos apagar valores de certos atributos apenas. SQL expressa uma remoção por:
 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 DELETE FROM r
 WHERE P;
 \end{lstlisting}
@@ -907,7 +907,7 @@ onde \textbf{P} é um predicado e \textbf{r} representa uma relação.
 O \textbf{DELETE} procura primeiro todos os tuplos \textit{t} em \textbf{r} tal que \textbf{\textit{P(t)}} seja verdadeiro, e depois remove-os de \textbf{r}. Se o predicado \textbf{P} for omitido, remove todos os tuplos da relação \textbf{r}.
 
 \textbf{1)} Seja a seguinte operação: "Apague todos os tuplos na relação \textit{instructor} cujo edifício do respetivo departamento contém Watson no nome.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 DELETE FROM instructor
 WHERE dept_name IN (SELECT dept_name
                     FROM department
@@ -918,13 +918,13 @@ WHERE dept_name IN (SELECT dept_name
 Para inserir dados numa relação, ou especificamos o tuplo a ser inserido ou escrevemos uma consulta cujo resultado é um conjunto de tuplos a serem inseridos.
 
 \textbf{1)} Seja a seguinte operação: "Insira um novo curso de ID EI-437 no departamento de Engenharia Informática com título "Sistemas de Bases de Dados" e 4 horas de crédito. Escrevemos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 INSERT INTO course
        VALUES ('EI-437', 'Sistemas de Bases de Dados', 'Engenharia Informatica', 4);
 \end{lstlisting}
 
 \textbf{2)} Seja a seguinte operação: "Faça cada estudante no departamento de Música que já tenha ganho 144 horas de crédito um instrutor no departamento de Música com um salário de 800€.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 INSERT INTO instructor
        SELECT ID, name, dept_name, 18000
        FROM student
@@ -935,7 +935,7 @@ INSERT INTO instructor
 Em certas situações, podemos querer mudar o valor de um tuplo sem mudar \textbf{todos} os valores nesse mesmo. Para tal, usamos o \textbf{STATEMENT}.
 
 \textbf{1)} Seja a seguinte operação: "Faça cada instrutor ter um aumento de 5\% no seu salário.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 UPDATE instructor
 SET salary = salary * 1.05
 
@@ -961,7 +961,7 @@ WHERE salary <= 1000;
 \end{lstlisting}
 
 Como vimos, no último \textit{tweak} a ordem era relevante. Para facilitar a vida do programador, o SQL fornece um construtor \textbf{CASE} para executar ambas as atualizações num único \textbf{UPDATE}:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 UPDATE instructor
 SET salary = CASE
                 WHEN salary <= 1000 THEN salary * 1.05
@@ -985,7 +985,7 @@ Até agora, usámos o produto Cartesiano para combinar informação de múltipla
 A operação de \textbf{NATURAL JOIN} opera em 2 relações e produz uma relação como resultado. Considera apenas os pares de tuplos com o mesmo valor nos atributos que aparecem nos esquemas de ambos. \\
 Assim, \\
 \textbf{1)} Seja a seguinte consulta: "Para todos os estudantes na universidade que tiraram um curso, descobre o nome e o ID do curso que tiraram.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- Antes do JOIN
 SELECT name, course_id
 FROM student, takes
@@ -1001,7 +1001,7 @@ FROM student NATURAL JOIN takes
 De notar que o que realmente está a acontecer ao fazer \textbf{NATURAL JOIN} é que se estão a considerar apenas os pares de tuplos onde quer o tuplo de \textit{student}, quer o tuplo de \textit{takes} têm o mesmo valor no atributo comum, \textbf{ID}.
 
 O resultado de uma operação de \textbf{NATURAL JOIN} é uma relação. Uma cláusula \textbf{FROM} de uma consulta SQL pode ter múltiplas relações combinadas usando o \textbf{NATURAL JOIN}. A consulta SQL na sua forma geral usando \textbf{NATURAL JOIN}'s é dada por:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT A_1, A_2, ..., A_n
 FROM E_1, E_2, ..., E_m
 WHERE P;
@@ -1010,7 +1010,7 @@ WHERE P;
 Por sua vez, cada $E_i$ pode ser uma única relação ou uma expressão envolvendo \textbf{NATURAL JOIN}'s.
 
 \textbf{1)} Seja a seguinte consulta: "Lista os nomes dos estudantes bem como o título dos cursos que já tiraram.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- Exemplificacao da formula geral (primeiro faz o NATURAL JOIN, so depois o produto cartesiano)
 SELECT name, title
 FROM student NATURAL JOIN takes, course
@@ -1020,11 +1020,11 @@ WHERE takes.course_id = course.course_id;
 De notar que não podemos fazer um duplo \textbf{NATURAL JOIN}, pois necessitaríamos que os valores dos atributos \textit{dept\_name} e \textit{course\_id} fossem iguais, quando só queremos juntar o \textit{course\_id}. 
 
 Para tal, o SQL fornece a operação \textbf{JOIN \dots USING} que leva no \textbf{USING} uma lista de nomes de atributos a serem especificados. Ou seja, se tivéssemos 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 r_1 JOIN r_2 USING (A_1, A_2)
 \end{lstlisting}
 seria semelhante a 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 r_1 NATURAL JOIN r_2
 \end{lstlisting}
 porém um par de tuplos no primeiro caso corresponde se $t_1.A_1 = t_2.A_1$ e $t_1.A_2 = t_2.A_2$, e mesmo que se tivessem ambos um terceiro atributo $A_3$, não seria necessário $t_1.A_3 = t_2.A_3$, enquanto que no segundo caso já seria.
@@ -1033,7 +1033,7 @@ porém um par de tuplos no primeiro caso corresponde se $t_1.A_1 = t_2.A_1$ e $t
 O SQL suporta outra forma de \textbf{JOIN}, no qual uma condição arbitrária pode ser especificada com a palavra-chave \textbf{ON}. Esta palavra-chave recebe um predicado geral sobre as relações a serem \textbf{JOIN}ed e aparece no fim da expressão \textbf{JOIN}.
 
 \textbf{0)} Seja a seguinte consulta:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT *
 FROM student JOIN takes ON student.ID = takes.ID;
 
@@ -1044,7 +1044,7 @@ WHERE student.ID = takes.ID;
 \end{lstlisting}
 
 De notar que o que difere isto de um \textbf{NATURAL JOIN} é que a relação resultante tem o atributo ID listado 2 vezes, 1 para \textit{student} e outro para \textit{takes}, apesar dos seus valores terem de ser o mesmo.
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- Alternativa ao problema supramencionado
 SELECT student.ID as ID, name, dept_name, tot_cred, 
        course_id, sec_id, semester, year, grade
@@ -1075,13 +1075,13 @@ for each tuple r in A that doesn't match with B:
 \end{verbatim}
 
 Se considerarmos um estudante que nunca tenha tirado um curso, podemos agora listar todos os estudantes e os seus cursos (mesmo que ainda não tenham tirado um), do seguinte modo:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT *
 FROM student NATURAL LEFT OUTER JOIN takes;
 \end{lstlisting}
 
 \textbf{1)} Seja a seguinte consulta: "Encontra todos os alunos que ainda não tiraram um curso.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- Usando LEFT OUTER JOIN
 SELECT ID
 FROM student NATURAL LEFT OUTER JOIN takes
@@ -1096,7 +1096,7 @@ WHERE course_id IS NULL;
 O \textbf{FULL OUTER JOIN} é uma combinação de \textbf{LEFT OUTER JOIN} e \textbf{RIGHT OUTER JOIN}. Depois de computar o resultado do \textbf{INNER JOIN}, extende com \textbf{nulls} os tuplos do lado esquerdo da relação que não corresponderam com nenhum do lado direito da relação, e vice-versa. Por outras palavras, \textbf{FULL OUTER JOIN} = \textbf{LEFT OUTER JOIN} $\cup$ \textbf{RIGHT OUTER JOIN}.
 
 \textbf{2)} Seja a seguinte consulta: "Exiba uma lista de todos os estudantes no departamento de Engenharia Informática, bem como as secções de curso, se alguma, que ocorreram no 2º semestre de 2017; todas as secções de curso do 2º semestre de 2017 devem ser dispostas, mesmo que nenhum estudante de Engenharia Informática tenha tirado a secção do curso.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT *
 FROM (SELECT *
       FROM STUDENT
@@ -1109,7 +1109,7 @@ FROM (SELECT *
 
 A cláusula \textbf{ON} pode ser usada com \textbf{OUTER JOIN}'s. É importante notar que este difere do modo como a cláusula \textbf{WHERE} opera, ao contrário dos \textbf{INNER JOIN}.
 Ou seja,
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- LEFT OUTER JOIN (ON)
 SELECT *
 FROM student LEFT OUTER JOIN takes ON student.ID = takes.ID;
@@ -1127,7 +1127,7 @@ Para distinguir \textbf{JOIN}'s normais de \textbf{OUTER JOIN}'s, os \textbf{JOI
 
 Uma cláusula de \textbf{JOIN} pode ser usada para especificar \textbf{INNER JOIN} em vez de \textbf{OUTER JOIN} para espeficar que se quer um \textbf{JOIN} normal. Contudo, a palavra-chave \textbf{INNER} é opcional, pois por defeito, a cláusula \textbf{JOIN} efetua um \textbf{INNER JOIN} ou \textbf{JOIN} normal, ou seja,
 
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- JOIN
 SELECT *
 FROM student JOIN takes USING (id);
@@ -1142,12 +1142,12 @@ Eis uma lista que mostra que os vários tipos de \textbf{JOIN} (\textbf{INNER}, 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.6]{cap2/join_tipos_conds.png}
+    \includegraphics[scale = 0.5]{cap2/join_tipos_conds.png}
     \caption{Tipos e Condições de \textbf{JOIN}}
 \end{figure}
 
 Por fim, deixo uma nota sobre o \textbf{CROSS JOIN}. Estas 2 consultas são equivalentes:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT *
 FROM student, takes;
 
@@ -1159,7 +1159,7 @@ FROM student CROSS JOIN takes;
 
 \section{Vistas}
 Podemos querer criar uma coleção personalizade de relações "virtuais"\footnote{Diz-se virtual pois as vistas mapeiam dados das tabelas do \textbf{modelo físico} para um novo \textbf{modelo lógico}, havendo independência lógica entre estes 2 modelos.} que melhor se adequam a uma certa intuição do utilizador sobre a estrutura da organização. No exemplo da universidade, podemos querer listar todos as secções de curso oferecidas pelo departamento de Física no 2º semestre do ano de 2016, com o edifício e número de sala de cada secção. A consulta correspondente seria:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT course.course_id, sec_id, building, room_number
 FROM course, section
 WHERE course.course_id = section.course_id
@@ -1173,17 +1173,17 @@ Assim, o SQL permite uma "relação virtual" ser definida por uma consulta, e es
 
 \subsection{Definição de Vista}
 Definimos uma vista em SQL usando o comando \textbf{CREATE VIEW}. Para definir a vista devemos nomeá-la e definir qual a consulta que a computa.
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 CREATE VIEW v AS <expressao da consulta>;
 \end{lstlisting}
 
 Para a remover da base de dados, é igual a qualquer outro objeto de uma base de dados:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 DROP VIEW v;
 \end{lstlisting}
 
 Considerando a consulta que foi apresentada no início do sub-capítulo, podemos definir uma vista sobre essa consulta.
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 CREATE VIEW fisica_1semestre_2017 AS
     SELECT course.course_id, sec_id, building, room_number
     FROM course, section
@@ -1197,14 +1197,14 @@ CREATE VIEW fisica_1semestre_2017 AS
 Uma vez definida uma vista, podemos usar o nome que lhe foi atribuída para nos referirmos à relação que a vista gera.
 
 \textbf{1)} Seja a seguinte consulta: "Liste todos os cursos de Física oferecidos no 2º semestre do ano de 2017 que estão no edifício Watson).". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT course_id
 FROM fisica_1semestre_2017
 WHERE building = 'Watson';
 \end{lstlisting}
 
 Naturalmente, podemos criar vistas que usem vistas na sua consulta, desde que as vistas usadas na consulta estejam previamente definidas. Ou seja,
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 CREATE VIEW fisica_1semestre_2017_watson AS
     SELECT course_id, room_number
     FROM fisica_1semestre_2017
@@ -1221,7 +1221,7 @@ Assim, se um tuplo \textit{instructor} é adicionada à relação \textit{instru
 Aplicações que usam uma vista frequentemente ou que necessitam resposta rápida a certas consultas que computam agregações sobre relações grandes beneficiariam de uma \textbf{vista materializada}.
 
 No contexto do PostgreSQL (SGBD da cadeira), eis os comandos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- Criar vistas materializadas
 CREATE MATERIALIZED VIEW view_exemplo AS SELECT ...
 
@@ -1252,9 +1252,458 @@ Em geral, no SQL uma vista diz-se \textbf{atualizável}, i.e., permite o uso dos
 
 Contudo, as vistas podem também ser definidas com a opção \textbf{WITH CHECK} que aquando da tentativa de atualização da vista, se as restrições especificados na opção não forem verificadas, a atualização é descartada.
 
+\section{Restrições de Integridade}
+\begin{definition}[Restrição de Integridade]
+    Uma restrição de integridade assegura que mudanças feitas à base de dados por utilizadores \textbf{autorizados} não resultam em perca de consistência de dados.
+\end{definition}
+
+\subsection{Restrições em 1 Relação}
+Como já vimos, a criar tabelas podemos ter instruções de restrições de integridade. Eis algumas delas:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{PRIMARY KEY} (já vimos anteriormente)
+    \item[--] \textbf{NOT NULL}
+    \item[--] \textbf{UNIQUE}
+    \item[--] \textbf{CHECK}($<$predicado$>$)
+\end{itemize}
+
+\subsection{Restrição NOT NULL}
+Para certos atributos, o valor null pode ser desapropriado. Por exemplo, na relação \textit{student} não faz sentido ter o atributo \textit{name} a null, pois representa um estudante desconhecido.
+Assim, adicionaríamos ao criar a relação \textit{student}:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE TABLE student 
+    (...,
+    name VARCHAR(20) NOT NULL,
+    ...;
+\end{lstlisting}
+Esta restrição proíbe a inserção de um valor null para o atributo especificado, e é um exemplo de uma \textbf{restrição de domínio}. 
+
+De notar também que o SQL, por defeito, não permite valores null em atributos que constituam a \textbf{chave primária} de uma relação.
+
+\subsection{Restrição UNIQUE}
+A especificação \textbf{UNIQUE} forma uma super-chave - nenhuns 2 tuplos na relação podem ter os atributos especificados no \textbf{UNIQUE} iguais. Um exemplo de uma espeficação \textbf{UNIQUE} é dado por:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+UNIQUE (name, age, gender)
+\end{lstlisting}
+
+\subsection{Cláusula CHECK}
+Um uso comum da cláusula \textbf{CHECK} é assegurar que valores de atributos satisfazem condições especificadas. Por exemplo, usando valores da vida real, convém que um orçamento para um departamento seja um número real positivo.
+Temos então:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Podemos escrever no fim
+CREATE TABLE department
+    (dept_name VARCHAR(20),
+     building VARCHAR(15),
+     budget NUMERIC(12, 2),
+    PRIMARY KEY (dept_name),
+    CHECK (budget > 0));
+-- Ou a declarar o atributo
+CREATE TABLE department
+    (dept_name VARCHAR(20),
+     building VARCHAR(15),
+     budget NUMERIC(12, 2) CHECK (budget > 0),
+    PRIMARY KEY (dept_name));
+\end{lstlisting}
+A cláusula \textbf{CHECK} permite atribuir restrições ao domínio de um atributo de uma forma potente.
+
+\subsection{Integridade de Referenciamento}
+Por vezes, queremos assegurar que um valor que aparece numa relação para um dado conjunto de atributos também aparece num conjunto de atributos duma outra relação. Tais condições dizem-se ser as \textbf{restrições de intregidade de referenciamento}, e as \textbf{FOREIGN KEY} são uma forma dessas restrições onde os atributos referenciados formam uma \textbf{chave primária} na relação referenciada. Eis um exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Podemos escrever no fim
+CREATE TABLE course
+    (course_id VARCHAR(8),
+     title VARCHAR(50),
+     dept_name VARCHAR(20),
+     credits NUMERIC(2, 0) CHECK (credits > 0),
+    PRIMARY KEY (course_id),
+    FOREIGN KEY (dept_name) REFERENCES department);
+-- Ou a declarar o atributo
+CREATE TABLE course
+    (course_id VARCHAR(8),
+     title VARCHAR(50),
+     dept_name VARCHAR(20) REFERENCES department,
+     credits NUMERIC(2, 0) CHECK (credits > 0),
+    PRIMARY KEY (course_id));
+\end{lstlisting}
+
+Esta declaração \textbf{FOREIGN KEY} exige que para cada tuplo em \textit{course}, o nome do departamento especificado tem de existir na relação \textit{department}.
+
+Quando uma restrição de integridade de referenciamento é violada, o procedimento normal é rejeitar a ação que causou o violamento. Contudo, uma cláusula \textbf{FOREIGN KEY} pode especificar que se uma ação de remoção ou atualização na relação referida for violada, o sistema deve seguir alguns passos para mudar o tuplo na relação em que a restrição é definida para restaurar a mesma. Seja:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE TABLE course
+    (...
+    FOREIGN KEY (dept_name) REFERENCES department
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE,
+    ...);
+\end{lstlisting}
+A cláusula \textbf{ON DELETE CASCADE} fará com que se removermos um tuplo na relação \textit{department} que resulte na violação desta restrição de integridade na relação \textit{course}, o sistema "por cascata" apaga os tuplos em \textit{course} que referenciavam aquele nome de departamento. O comportamento do \textbf{ON UPDATE CASCADE} é análogo.
+
+Se quisermos outro comportamento em vez de ser apagar o tuplo em \textit{course}, podemos definir o valor a null, metendo a cláusula \textbf{SET NULL} no lugar de \textbf{CASCADE}.
+
+\subsection{Restrições Nomeadas}
+É possível denominar uma restrição de integridade. Pode ser útil se quisermos remover uma restrição que fora definida previamente.
+Para tal, temos o exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar a restricao nomeada
+CREATE TABLE instructor
+    (...
+    salary NUMERIC(8, 2), CONSTRAINT minsalary CHECK (salary > 1000),
+    ...);
+-- Remover a restricao
+ALTER TABLE instructor DROP CONSTRAINT minsalary;
+\end{lstlisting}
+
+\section{Autorização}
+Podemos atribuir a um utilizador várias formas de autorização em partes da base de dados. 
+
+Para criarmos/removermos um utilizador usamos os seguintes comandos:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar um utilizador
+CREATE USER 'Aragonez' WITH PASSWORD 'Joao';
+-- Remover um utilizador
+DROP USER [IF EXISTS] 'Aragonez';
+\end{lstlisting}
+
+Os vários tipos de autorização chamam-se \textbf{privilégios} e estes são:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Autorização para ler dados;
+    \item[--] Autorização para inserir novos dados;
+    \item[--] Autorização para atualizar dados;
+    \item[--] Autorização para remover dados.
+\end{itemize}
+Quando um utilizador submete uma operação de consulta ou atualização, a implementação SQL verifica primeiramente se a operação é autorizada, com base nos privilégios do utilizador - se não for autorizada, é rejeitada.
+
+\subsection{Concessão e Revogação de Privilégios}
+O SQL \textit{standard} inclui os \textbf{privilégios} \textbf{SELECT, INSERT, UPDATE} e \textbf{DELETE}. Inclui ainda o privilégio \textbf{ALL} que é um atalho para todos os privilégios anteriores.
+
+A DDL do SQL inclui comandos para conceder e revogar privilégios. A instrução \textbf{GRANT} é usada para conferir autorização e tem a seguinte forma geral:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT <lista de privilegios>
+ON <nome da relacao ou vista>
+TO <lista de utilizadores/papeis>
+\end{lstlisting}
+
+A autorização \textbf{SELECT} numa relação é necessária para ler tuplos na relação. Um exemplo de querermos dar ao utilizador "Aragonez" (utilizador de escolha daqui em diante) autorização para fazer consultas \textbf{SELECT} na relação \textit{department} é dado por:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT SELECT
+ON department
+TO Aragonez
+\end{lstlisting}
+
+A autorização \textbf{UPDATE} numa relação permite o utilizador atualizar qualquer tuplo na relação - podem ser dado todos os atributos da relação ou apenas alguns. No caso de selecionarmos apenas alguns atributos, devem ser seguidos da cláusula \textbf{UPDATE} um conjunto de parêntes ( ) com os atributos lá dentro especificados. Por exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT UPDATE (budget)
+ON department
+TO Aragonez
+\end{lstlisting}
+
+A autorização \textbf{INSERT} numa relação permite o utilizador inserir tuplos na relação - podem ser dado todos os atributos da relação ou apenas alguns. No caso de selecionarmos apenas alguns atributos, devem ser seguidos da cláusula \textbf{INSERT} um conjunto de parêntes ( ) com os atributos lá dentro especificados. Para os valores que não pertençam a este conjunto, o sistema ou lhes atribui um valor \textbf{DEFAULT} se assim o for especificado, ou mete-os a \textbf{NULL}.
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT INSERT (budget)
+ON department
+TO Aragonez
+\end{lstlisting}
+
+A autorização \textbf{DELETE} numa relação permite o utilizador remover tuplos duma relação.
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT DELETE
+ON department
+TO Aragonez
+\end{lstlisting}
+
+O utilizador \textit{public} refere-se ao utilizador atual e todos os futuros utilizadores do sistema - os seus privilégios são-lhes concecidos implicitamente.
+
+O mecanismo de autorização do SQL concede privilégios numa relação inteira, ou em atributos específicos de uma relação. Contudo, não permite autorizações em tuplos específicos de uma relação.
+
+Para revogar uma autorização, usamos a instrução \textit{REVOKE}, que tem uma forma geral análoga à \textbf{GRANT}:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+REVOKE <lista de privilegios>
+ON <nome da relacao ou vista>
+TO <lista de utilizadores/papeis>
+\end{lstlisting}
+
+Para revogarmos os privilégios concedidos previamente escrevemos:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+REVOKE SELECT ON department FROM Aragonez;
+REVOKE UPDATE (budget) ON department FROM Aragonez;
+REVOKE INSERT (budget) ON department FROM Aragonez;
+REVOKE DELETE ON department FROM Aragonez;
+\end{lstlisting}
+
+\subsection{Papéis}
+Consideremos os papéis das várias pessoas no mundo real. Seja um papel por exemplo um instrutor, professor-assistente e estudante exemplos de papéis num contexto universitário. 
+
+Quando um novo instrutor for contratado, um identificador de utilizador terá de ser alocado a ele, e este deve ser identificado com o papel de instrutor, que engloba em si um conjunto de permissões no sistema.
+
+A noção de \textbf{papéis} em SQL captura este conceito - um conjunto de papéis é criado na base de dados, e autorização são concedidas a papéis da mesma forma que são concedidas a utilizadores.
+
+É verdade que poderíamos criar um único utilizador \textit{instrutor} e todos acederem a partir desse mesmo, mas por questões de segurança, é preferível identificar exatamente que instrutor executou uma certa operação sobre a base de dados.
+
+Os \textbf{papéis} em SQL são criados da seguinte maneira:
+\begin{lstlisting}[language=SQL, morekeywords={TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar o papel
+CREATE ROLE instructor;
+
+-- Conceder permissoes
+GRANT SELECT
+ON takes
+TO instructor;
+
+-- Papeis podem ser concedidos a utilizadores bem como a outros papeis
+CREATE ROLE dean;
+GRANT 
+instructor 
+TO dean;
+
+GRANT UPDATE
+ON takes 
+TO dean;
+
+GRANT dean TO Aragonez;
+\end{lstlisting}
+
+Os privilégios de um utilizador/papel consistem em:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Todos os privilégios concedidos diretamente ao utilizador/papel;
+    \item[--] Todos os privilégios concedidos aos papéis que foram concedidos ao utilizador/papel.
+\end{itemize}
+Isto pode criar correntes de papéis, o que deve ser gerido cuidadosamente.
+
+\subsection{Autorização em Vistas}
+Como vimos, as vistas também podem ser alvo de autorização.
+
+Porém, é importante notar que um utilizador que cria uma vista não recebe necessariamente todos os privilégios da vista - só recebe os privilégios que não requiram autorização adicional para além do que o que já possui. Por exemplo, um utilizador que cria uma vista não pode ter a autorização \textbf{UPDATE} numa vista sem tem autorização \textbf{UPDATE} em todas as relações que a vista refere - se o utilizador criar uma vista sem permissões suficientes para tal, o sistema nega-lhe o pedido de criação de vista.
+
+\subsection{Autorização em Esquemas}
+O SQL \textit{standard} especifica um mecanismo de autorização primitivo para o esquema de base de dados: apenas o \textbf{dono do esquema} pode modificá-lo, como criar e remover \textbf{relações}, adicionar ou tirar \textbf{atributos de relações}, bem como adicionar ou tirar \textbf{índices}.
+
+Contudo, o SQL fornece um privilégio \textbf{REFERENCES} que permite a um utilizar declarar chaves secundárias ao criar relações. O privilégio é concedido a atributos específicos como o privilégio \textbf{UPDATE}. Passo a exemplificar:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT REFERENCES (dept_name) ON department TO Aragonez;
+\end{lstlisting}
+
+\section{Funções e Procedimentos}
+\subsection{Introdução}
+\begin{definition}[Base de Dados Centrada Em Dados]
+    O desenvolvimento de uma base de dados centrada em dados é uma abordagem de desenvolvimento onde instruções procedimentais (como um sub-programa em qualquer linguagem de programação) pode ser armazenado dentro de uma base de dados também conhecidas como \textbf{stored program} / \textbf{stored routine}.
+\end{definition}
+
+Um \textbf{Persistent Stored Module} (\textbf{PSM}) pode ser de 2 tipos:
+\begin{itemize}
+    \item[--] Uma \textbf{stored function} que \textbf{retorna um valor} mas \textbf{não altera} o estado da base de dados - combina \textit{inputs} e resultados das consultas da base de dados para produzir o \textit{output}.
+    \item[--] Um \textbf{stored procedure} que \textbf{pode mudar} o estado da base de dados e \textbf{não retorna nenhum valor} - consulta e atualiza a base de dados.
+\end{itemize}
+
+As vantagens de usarmos \textbf{PSM}:
+\begin{itemize}
+    \item[--] Torna as aplicações \textbf{mais rápidas}: os PSM são compilados e mantidos dentro da base de dados.
+    \item[--] \textbf{Reduz a troca de dados}: especialmente entre a aplicação e o servidor da base de dados.
+    \item[--] Introduz \textbf{1 nível de indireção}: pode ser chamado por aplicações escritas em linguagens distintas.
+\end{itemize}
+
+As desvantagens de usarmos \textbf{PSM}:
+\begin{itemize}
+    \item[--] \textbf{Debugging} e \textbf{profiling} pode ser extremamente difícil;
+    \item[--] O ambiente de desenvolvimento depende altamente do SGBD usado.
+\end{itemize}
+
+Funções e procedimentos permitem que a "lógica de negócio" seja guardada na base de dados e executada a partir de instruções de SQL. Por exemplo, universidades têm várias regras sobre quantas cadeiras um estudante por detirar ao mesmo tempo num dado semestre. 
+
+\subsection{Declaração e Invocação de Funções e Procedimentos SQL}
+Para definirmos/removermos um procedimento ou uma função:
+\begin{lstlisting}[language=SQL, morekeywords={PROCEDURE, FUNCTION, REPLACE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar
+CREATE [OR REPLACE] PROCEDURE/FUNCTION ...
+-- Remover
+DROP PROCEDURE/FUNCTION ...
+\end{lstlisting}
+
+Para invocarmos um procedimento ou uma função (podem ser chamados a partir de outros procedimentos ou de aplicações a nível do cliente):
+\begin{lstlisting}[language=SQL, morekeywords={CALL}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Chamar procedimento
+CALL procedure_name [(param1, param2, ...)]
+-- Chamar funcao
+my_function_name([param1, param2, ...])
+\end{lstlisting}
+
+\textbf{1)} Seja a seguinte operação: "Cria um procedimento que insere o tipo de gomas preferidas do João Aragonez na relação \textit{aragonez\_senior\_shopping\_list} mediante o seu grau de fome ($<50\%$ são as gomas ácidas, caso contrário são as doces)". Temos:
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE PROCEDURE fome_aragonez(IN grau_fome INTEGER) AS
+
+DECLARE gomas VARCHAR(6);
+BEGIN
+    IF grau_fome < 50
+    THEN
+        SET gomas := 'acidas';
+    ELSE
+        SET gomas := 'doces';
+    END IF;
+    INSERT INTO aragonez_senior_shopping_list
+        VALUES (gomas);
+END
+\end{lstlisting}
+
+É de notar que o PostgreSQL não suporta \textbf{stored procedures} verdadeiros (um \textbf{PROCEDURE} em PostgreSQL é uma \textbf{FUNCTION} que retorna o \textit{type} \textbf{VOID}); apenas \textbf{stored functions} são suportadas.
+
+As \textbf{stored functions} na sua forma geral são:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE FUNCTION my_func([parametros]) 
+RETURNS type AS
+$$
+DECLARE [declaracoes]
+BEGIN
+    [instrucoes]
+END
+$$ LANGUAGE plpgsql;
+\end{lstlisting}
+De notar que o \textbf{PSM} no Postgres permite o \textit{type} ser \textbf{VOID}.
+
+\textbf{2)} Seja a seguinte operação: "Cria uma função que recebe 2 \textit{numeric}'s como \textit{input} e que retorna outro \textit{numeric} correspondente à soma dos dois.". Temos:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE FUNCTION add_nums(
+    x NUMERIC,
+    y NUMERIC) 
+    RETURNS NUMERIC AS
+$$
+BEGIN
+    RETURN x + y;
+END
+$$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+Podemos usar as \textbf{stored functions} nas cláusulas \textbf{SELECT} e \textbf{WHERE}. Exemplificando:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Sem clausula FROM
+SELECT add_me(2, 3);
+
+-- Como uma expressao no SELECT (aplicado a cada tuplo de instructor)
+SELECT name, add_me(salary, 100)
+FROM instructor
+
+-- Como uma expressao no WHERE (aplicado a cada tuplo de instructor)
+SELECT *
+FROM instructor
+WHERE add_me(salary, -1000) < 1000
+\end{lstlisting}
+
+\begin{definition}[Função Determinística]
+Uma função é determinística se produz sempre o mesmo resultado para os mesmos valores de \textit{input}.
+\end{definition}
+Em PostgreSQL, as função são \textbf{não-determinísticas} por defeito, pelo que se quisermos especificar que a função é determinística devemos usar o seguinte comando:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE, IMMUTABLE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE FUNCTION myfunc([params]) 
+RETURNS type IMMUTABLE
+\end{lstlisting}
+
+As funções e procedimentos permitem a \textbf{declaração de variáveis}, como já vimos, sem complexidade alguma. A sua forma geral é dada por:
+\begin{lstlisting}[language=SQL, deletekeywords={VALUE}, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE, IMMUTABLE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DECLARE var_name [, var_name2 ...] type [DEFAULT value]
+\end{lstlisting}
+Estas são apenas visíveis dentro do scope \textbf{BEGIN} \dots \textbf{END}.
+
+Um pequeno exemplo é dado por:
+\begin{lstlisting}[language=SQL, deletekeywords={VALUE}, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE, IMMUTABLE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DECLARE 
+    first_name VARCHAR(50) DEFAULT 'Joao';
+    last_name VARCHAR(50) DEFAULT 'Aragonez';
+    contador INTEGER := 1; -- eh assim que se fazem atribuicoes em PostgreSQL
+    pagamento NUMERIC(11, 2) := 20.5;
+\end{lstlisting}
+As variáveis podem também ser declaradas para captarem o resultado de uma consulta usando a cláusula \textbf{INTO}. Exemplificando a forma geral:
+\begin{lstlisting}[language=SQL, deletekeywords={VALUE}, morekeywords={INTO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+BEGIN
+    ...
+    SELECT col_name, ...
+    INTO var_name
+    FROM ...
+    ...
+END
+
+\end{lstlisting}
+É rápido para perceber que se quisermos vários atributos de uma relação guardados numa variável declarada, não existe nenhum \textit{type} pré-definido que as albergue sem problemas. Para isso, podemos criar o nosso próprio tipo, representado em baixo um exemplo de um tipo relevante:
+\begin{lstlisting}[language=SQL, morekeywords={CREATE, TYPE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE TYPE gomas_aragonez AS (
+    tipo VARCHAR(6),
+    preco_max NUMERIC(1, 2),
+    perc_acucar NUMERIC(3, 2)
+);
+\end{lstlisting}
+De notar que esta criação de tipos permite também ser fornecido como \textit{type} de retorno de uma \textbf{stored function}.
+
+\subsection{Construtores de Linguagem para Funções e Procedimentos}
+Existem várias instruções dentro do scope \textbf{BEGIN} \dots \textbf{END} da função/do procedimento.
+
+A sintaxe para instruções \textbf{WHILE} e \textbf{REPEAT} é dada por:
+\begin{lstlisting}[language=SQL, morekeywords={CREATE, TYPE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Ciclo WHILE
+WHILE expressao booleana DO
+    sequencia de instrucoes;
+END WHILE
+
+-- Ciclo REPEAT
+REPEAT
+    sequencia de instrucoes;
+UNTIL expressao boleana
+END REPEAT
+
+-- As palavras-chave break, continue e return nos ciclos em PostgreSQL sao dados por
+EXIT -- sai do loop
+CONTINUE -- continua o loop
+RETURN -- sai da funcao (e do loop)
+\end{lstlisting}
+
+Existe ainda um ciclo \textbf{FOR} que permite iterar sobre os resultados de uma consulta:
+\begin{lstlisting}[language=SQL, morekeywords={DECLARE, FOR, DO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DECLARE n INTEGER DEFAULT 0;
+FOR r AS
+    SELECT budget FROM department
+    WHERE dept_name = 'Musica'
+DO
+    SET n = n - r.budget
+END FOR
+\end{lstlisting}
+
+A sintaxe para instruções \textbf{IF-THEN-ELSE} é dada por:
+\begin{lstlisting}[language=SQL, morekeywords={IF, DECLARE, FOR, DO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+IF expressao booleana
+    THEN instrucao ou instrucao composta
+ELSE IF expressao booleana
+    THEN instrucao ou instrucao composta
+ELSE instrucao ou instrucao composta
+END IF
+\end{lstlisting}
+
+Se quiser ter o \textbf{PSM} a retornar \textbf{relações inteiras ou parciais} basta usar na cláusula \textbf{RETURNS} a palavra-chave \textbf{SETOF $<$relação$>$} se a quisermos na íntegra ou \textbf{TABLE(atr\_1 type(atr\_1), ..., atr\_m type(atr\_m))} se quisermos uma tabela parcialmente, assumindo que $m < n$, onde $n$ é o número de nomes de atributos diferentes na relação.
+
+Para ter o \textbf{PSM} a retornar \textbf{apenas um tuplo da relação} basta declarar uma variável do seguinte modo:
+\begin{lstlisting}[language=SQL, morekeywords={$$, RETURNS, DECLARE, ROWTYPE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+...
+RETURNS table_name AS
+$$
+DECLARE
+    var_name table_name%ROWTYPE
+\end{lstlisting}
+
+\subsection{Blocos DO}
+Os blocos \textbf{DO} executam uma função anónima (sem qualquer nome atribuído). Eis um exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={DECLARE, FOR, DO, $$, RAISE, INFO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DO $$
+DECLARE total NUMERIC DEFAULT 0;
+BEGIN
+    SELECT sum(salary)
+    INTO total
+    FROM instructor;
+    RAISE INFO 'Total salarios pagos a instrutores --> %', total;
+END
+$$;
+\end{lstlisting}
+
 \chapter{Transações}
 \section{Introdução às Transações}
-\begin{definition}
+\begin{definition}[Transação]
     Uma transação é um conjunto de operações de um programa que formam uma unidade lógica de trabalho na qual podem ser acedidos e atualizados vários dados.
 \end{definition}
 Existem 2 questões a resolver nas transações:
@@ -1298,7 +1747,7 @@ Uma das seguintes instruções SQL deve terminar a transação:
 \end{itemize}
 
 \textbf{1)} Seja a seguinte transação: "Escreva uma transação que permita transferir 350€ da conta A para a conta B.". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 -- Verificar saldos
 SELECT balance
 FROM account
@@ -1318,7 +1767,7 @@ WHERE account_number='A';
 UPDATE account
 SET balance = balance + 350
 WHERE account_number='B';
--- Confirmar a transação
+-- Confirmar a transacao
 COMMIT;
 \end{lstlisting}
 
@@ -1326,7 +1775,7 @@ Vários sistemas usam \textit{auto-commit} por defeito, onde o início explícit
 
 Para lidar com a concorrência, normalmente usam-se modelos de trincos, e trancam-se tuplos envolvidos numa operação antes de lhes aceder.
 Para a seguinte consulta que tenciona ver em que departamento é que os instrutores chamados "João Aragonez" trabalham:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT dept_name
 FROM instructor
 WHERE name = 'Joao Aragonez';
@@ -1344,12 +1793,12 @@ Eis os níveis de consistência em SQL:
     \item[--] \textbf{Read uncommitted}: qualquer tuplo não confirmado pode ser lido.
 \end{itemize}
 Para alterarmos o nível de consistência devemos usar o seguinte comando:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY, UNCOMMITTED, COMMITTED, REPEATABLE, SERIALIZABLE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SET TRANSACTION ISOLATION LEVEL
-    { READ UNCOMMITTED
-    | READ COMMITTED
+    { SERIALIZABLE
     | REPEATABLE READ
-    | SERIALIZABLE
+    | READ COMMITTED
+    | READ UNCOMMITTED
     }
 \end{lstlisting}
 
