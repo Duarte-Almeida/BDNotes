@@ -27,12 +27,11 @@
 \newtheorem{theorem}{Teorem}
 \newtheorem{lemma}{Lema}
 
+\lstset{inputencoding=utf8/latin1}
+
 \usepackage{xcolor,listings}
 \usepackage{textcomp}
 \usepackage{color}
-
-\lstset{inputencoding=utf8/latin1}
-
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{HTML}{C42043}
@@ -216,7 +215,6 @@ O processo de conceção de um base de dados incide inicialmente no \textbf{dese
     \item[--] \textbf{DBA} (\textit{Database Administrators}), que concebem e mantêm a base de dados, em termos de desenho físico e lógico, segurança e configuração dos mecanismos de disponibilidade e recuperação. 
 \end{itemize}
 
-
 \chapter{SQL}
 
 \section{Visão Global da Linguagem \textit{Query} SQL}
@@ -294,8 +292,8 @@ CREATE TABLE r
 O SQL suporta uma variedade de \textbf{restrições de integridade}. Algumas delas são:
 \begin{itemize}
     \itemsep0cm
-    \item[--]\textbf{primary key} ($A_{j_{1}}, A_{j_{2}}, ..., A_{j_{m}}$): esta especificação diz que os atributos $A_{j_{1}}, A_{j_{2}}, ..., A_{j_{m}}$ formam a chave primária da relação - por definição estes devem ser \textbf{NOT NULL} e \textbf{UNIQUE}, i.e., nenhum tuplo pode ter um valor \textbf{null} como atributo de chave primária, e não existem 2 tuplos numa relação com atributos de chave primária iguais. Esta especificação é \textbf{opcional}.
-    \item[--]\textbf{foreign key} ($A_{j_{1}}, A_{j_{1}}, ..., A_{j_{n}}$) \textbf{references} \textit{s}: esta especificação diz que os valores dos atributos ($A_{k_{1}}, A_{k_{2}}, \\ ..., A_{k_{1}}$) para qualquer tuplo na relação devem corresponder aos atributos de chave primária de algum tuplo da relação \textit{s}.
+    \item[--]\textbf{primary key} ($A_{j}_{1}, A_{j}_{2}, ..., A_{j}_{m}$): esta especificação diz que os atributos $A_{j}_{1}, A_{j}_{2}, ..., A_{j}_{m}$ formam a chave primária da relação - por definição estes devem ser \textbf{NOT NULL} e \textbf{UNIQUE}, i.e., nenhum tuplo pode ter um valor \textbf{null} como atributo de chave primária, e não existem 2 tuplos numa relação com atributos de chave primária iguais. Esta especificação é \textbf{opcional}.
+    \item[--]\textbf{foreign key} ($A_{k}_{1}, A_{k}_{2}, ..., A_{k}_{n}$) \textbf{references} \textit{s}: esta especificação diz que os valores dos atributos ($A_{k}_{1}, A_{k}_{2}, \\ ..., A_{k}_{n}$) para qualquer tuplo na relação devem corresponder aos atributos de chave primária de algum tuplo da relação \textit{s}.
     \item[--]\textbf{not null}: esta especificação aplica-se a um atributo e especifica que o valor \textbf{null} não é permitido nele, i.e., excluir o valor \textbf{null} do domínio do mesmo.
 \end{itemize}
 O SQL previne qualquer atualização à base de dados que viole uma restrição de integridade.\\
@@ -362,7 +360,7 @@ CREATE TABLE teaches
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor;
-\end{lstlisting} 
+\end{lstlisting} \\
 \textbf{2)} Seja a seguinte consulta: "Encontra os nomes de departamento de todos os instrutores.". Dado que mais do que 1 instrutor pode pertencer ao mesmo departamento, o mesmo nome de departamento pode aparecer múltiplas vezes na relação \textit{instructor}. Como tal, interessa-nos forçar a eliminação de duplicados na relação resultante da consulta. Para tal:
 
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
@@ -381,7 +379,7 @@ FROM instructor;
 SELECT name
 FROM instructor
 WHERE dept_name='Engenharia Informática' AND salary > 2000;
-\end{lstlisting}
+\end{lstlisting} \\
 De notar que o SQL permite o uso de conectores lógicos \textbf{and}, \textbf{or} e \textbf{not} na cláusula \textbf{WHERE}. Os operandos dos conectores lógicos podem ser expressões envolvendo operadores de comparação $<, \leq, >, \geq, =$ e $<>$, permitindo-nos comparar cadeias de caracteres e expressões aritméticas, bem como tipos especiais, como uma data.
 
 \subsection{Consultas em N Relações}
@@ -392,7 +390,7 @@ As consultas por vezes precisam de acesso a informação de múltiplas relaçõe
 SELECT name, instructor.dept_name, building
 FROM instructor, department
 WHERE instructor.dept_name = department.dept_name;
-\end{lstlisting} 
+\end{lstlisting} \\
 De notar que como o atributo \textit{dept\_name} ocorre em ambas as relações, o prefixo \textit{instructor.dept\_name} é necessário para tornar claro qual o atributo a que nos estamos a referir. Como \textit{name} e \textit{building} só aparecem em 1 das relações não é necessário o seu prefixo.
 
 Podemos assim definir o papel de cada cláusula:
@@ -759,13 +757,8 @@ WHERE semester=2 AND year=2017 AND
 \end{lstlisting}
 
 De notar que os operadores \textbf{IN} e \textbf{NOT IN} podem também ser usados em conjuntos enumerados. Por exemplo, \\
-<<<<<<< HEAD
-\textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo nome não é "Mozart" nem "Einstein"". Temos:
-\begin{lstlisting}[ language=SQL,                     deletekeywords={IDENTITY},                     deletekeywords={[2]INT},                     morekeywords={clustered},                     framesep=8pt,                     xleftmargin=40pt,                     framexleftmargin=40pt,                     frame=tb,                     framerule=0pt]
-=======
 \textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo nome não é "Mozart" nem "Einstein\"\". Temos:
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
->>>>>>> 4648cc633a9298491f19d1fb02839a5d08ddfe75
 SELECT DISTINCT name
 FROM instructor
 WHERE name NOT IN ('Mozart', 'Einstein');
@@ -1278,6 +1271,455 @@ Em geral, no SQL uma vista diz-se \textbf{atualizável}, i.e., permite o uso dos
 
 Contudo, as vistas podem também ser definidas com a opção \textbf{WITH CHECK} que aquando da tentativa de atualização da vista, se as restrições especificados na opção não forem verificadas, a atualização é descartada.
 
+\section{Restrições de Integridade}
+\begin{definition}[Restrição de Integridade]
+    Uma restrição de integridade assegura que mudanças feitas à base de dados por utilizadores \textbf{autorizados} não resultam em perca de consistência de dados.
+\end{definition}
+
+\subsection{Restrições em 1 Relação}
+Como já vimos, a criar tabelas podemos ter instruções de restrições de integridade. Eis algumas delas:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{PRIMARY KEY} (já vimos anteriormente)
+    \item[--] \textbf{NOT NULL}
+    \item[--] \textbf{UNIQUE}
+    \item[--] \textbf{CHECK}($<$predicado$>$)
+\end{itemize}
+
+\subsection{Restrição NOT NULL}
+Para certos atributos, o valor null pode ser desapropriado. Por exemplo, na relação \textit{student} não faz sentido ter o atributo \textit{name} a null, pois representa um estudante desconhecido.
+Assim, adicionaríamos ao criar a relação \textit{student}:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE TABLE student 
+    (...,
+    name VARCHAR(20) NOT NULL,
+    ...;
+\end{lstlisting}
+Esta restrição proíbe a inserção de um valor null para o atributo especificado, e é um exemplo de uma \textbf{restrição de domínio}. 
+
+De notar também que o SQL, por defeito, não permite valores null em atributos que constituam a \textbf{chave primária} de uma relação.
+
+\subsection{Restrição UNIQUE}
+A especificação \textbf{UNIQUE} forma uma super-chave - nenhuns 2 tuplos na relação podem ter os atributos especificados no \textbf{UNIQUE} iguais. Um exemplo de uma espeficação \textbf{UNIQUE} é dado por:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+UNIQUE (name, age, gender)
+\end{lstlisting}
+
+\subsection{Cláusula CHECK}
+Um uso comum da cláusula \textbf{CHECK} é assegurar que valores de atributos satisfazem condições especificadas. Por exemplo, usando valores da vida real, convém que um orçamento para um departamento seja um número real positivo.
+Temos então:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Podemos escrever no fim
+CREATE TABLE department
+    (dept_name VARCHAR(20),
+     building VARCHAR(15),
+     budget NUMERIC(12, 2),
+    PRIMARY KEY (dept_name),
+    CHECK (budget > 0));
+-- Ou a declarar o atributo
+CREATE TABLE department
+    (dept_name VARCHAR(20),
+     building VARCHAR(15),
+     budget NUMERIC(12, 2) CHECK (budget > 0),
+    PRIMARY KEY (dept_name));
+\end{lstlisting}
+A cláusula \textbf{CHECK} permite atribuir restrições ao domínio de um atributo de uma forma potente.
+
+\subsection{Integridade de Referenciamento}
+Por vezes, queremos assegurar que um valor que aparece numa relação para um dado conjunto de atributos também aparece num conjunto de atributos duma outra relação. Tais condições dizem-se ser as \textbf{restrições de intregidade de referenciamento}, e as \textbf{FOREIGN KEY} são uma forma dessas restrições onde os atributos referenciados formam uma \textbf{chave primária} na relação referenciada. Eis um exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Podemos escrever no fim
+CREATE TABLE course
+    (course_id VARCHAR(8),
+     title VARCHAR(50),
+     dept_name VARCHAR(20),
+     credits NUMERIC(2, 0) CHECK (credits > 0),
+    PRIMARY KEY (course_id),
+    FOREIGN KEY (dept_name) REFERENCES department);
+-- Ou a declarar o atributo
+CREATE TABLE course
+    (course_id VARCHAR(8),
+     title VARCHAR(50),
+     dept_name VARCHAR(20) REFERENCES department,
+     credits NUMERIC(2, 0) CHECK (credits > 0),
+    PRIMARY KEY (course_id));
+\end{lstlisting}
+
+Esta declaração \textbf{FOREIGN KEY} exige que para cada tuplo em \textit{course}, o nome do departamento especificado tem de existir na relação \textit{department}.
+
+Quando uma restrição de integridade de referenciamento é violada, o procedimento normal é rejeitar a ação que causou o violamento. Contudo, uma cláusula \textbf{FOREIGN KEY} pode especificar que se uma ação de remoção ou atualização na relação referida for violada, o sistema deve seguir alguns passos para mudar o tuplo na relação em que a restrição é definida para restaurar a mesma. Seja:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE TABLE course
+    (...
+    FOREIGN KEY (dept_name) REFERENCES department
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE,
+    ...);
+\end{lstlisting}
+A cláusula \textbf{ON DELETE CASCADE} fará com que se removermos um tuplo na relação \textit{department} que resulte na violação desta restrição de integridade na relação \textit{course}, o sistema "por cascata" apaga os tuplos em \textit{course} que referenciavam aquele nome de departamento. O comportamento do \textbf{ON UPDATE CASCADE} é análogo.
+
+Se quisermos outro comportamento em vez de ser apagar o tuplo em \textit{course}, podemos definir o valor a null, metendo a cláusula \textbf{SET NULL} no lugar de \textbf{CASCADE}.
+
+\subsection{Restrições Nomeadas}
+É possível denominar uma restrição de integridade. Pode ser útil se quisermos remover uma restrição que fora definida previamente.
+Para tal, temos o exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar a restricao nomeada
+CREATE TABLE instructor
+    (...
+    salary NUMERIC(8, 2), CONSTRAINT minsalary CHECK (salary > 1000),
+    ...);
+-- Remover a restricao
+ALTER TABLE instructor DROP CONSTRAINT minsalary;
+\end{lstlisting}
+
+\section{Autorização}
+Podemos atribuir a um utilizador várias formas de autorização em partes da base de dados. 
+
+Para criarmos/removermos um utilizador usamos os seguintes comandos:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar um utilizador
+CREATE USER 'Aragonez' WITH PASSWORD 'Joao';
+-- Remover um utilizador
+DROP USER [IF EXISTS] 'Aragonez';
+\end{lstlisting}
+
+Os vários tipos de autorização chamam-se \textbf{privilégios} e estes são:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Autorização para ler dados;
+    \item[--] Autorização para inserir novos dados;
+    \item[--] Autorização para atualizar dados;
+    \item[--] Autorização para remover dados.
+\end{itemize}
+Quando um utilizador submete uma operação de consulta ou atualização, a implementação SQL verifica primeiramente se a operação é autorizada, com base nos privilégios do utilizador - se não for autorizada, é rejeitada.
+
+\subsection{Concessão e Revogação de Privilégios}
+O SQL \textit{standard} inclui os \textbf{privilégios} \textbf{SELECT, INSERT, UPDATE} e \textbf{DELETE}. Inclui ainda o privilégio \textbf{ALL} que é um atalho para todos os privilégios anteriores.
+
+A DDL do SQL inclui comandos para conceder e revogar privilégios. A instrução \textbf{GRANT} é usada para conferir autorização e tem a seguinte forma geral:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT <lista de privilegios>
+ON <nome da relacao ou vista>
+TO <lista de utilizadores/papeis>
+\end{lstlisting}
+
+A autorização \textbf{SELECT} numa relação é necessária para ler tuplos na relação. Um exemplo de querermos dar ao utilizador "Aragonez" (utilizador de escolha daqui em diante) autorização para fazer consultas \textbf{SELECT} na relação \textit{department} é dado por:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT SELECT
+ON department
+TO Aragonez
+\end{lstlisting}
+
+A autorização \textbf{UPDATE} numa relação permite o utilizador atualizar qualquer tuplo na relação - podem ser dado todos os atributos da relação ou apenas alguns. No caso de selecionarmos apenas alguns atributos, devem ser seguidos da cláusula \textbf{UPDATE} um conjunto de parêntes ( ) com os atributos lá dentro especificados. Por exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT UPDATE (budget)
+ON department
+TO Aragonez
+\end{lstlisting}
+
+A autorização \textbf{INSERT} numa relação permite o utilizador inserir tuplos na relação - podem ser dado todos os atributos da relação ou apenas alguns. No caso de selecionarmos apenas alguns atributos, devem ser seguidos da cláusula \textbf{INSERT} um conjunto de parêntes ( ) com os atributos lá dentro especificados. Para os valores que não pertençam a este conjunto, o sistema ou lhes atribui um valor \textbf{DEFAULT} se assim o for especificado, ou mete-os a \textbf{NULL}.
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT INSERT (budget)
+ON department
+TO Aragonez
+\end{lstlisting}
+
+A autorização \textbf{DELETE} numa relação permite o utilizador remover tuplos duma relação.
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT DELETE
+ON department
+TO Aragonez
+\end{lstlisting}
+
+O utilizador \textit{public} refere-se ao utilizador atual e todos os futuros utilizadores do sistema - os seus privilégios são-lhes concecidos implicitamente.
+
+O mecanismo de autorização do SQL concede privilégios numa relação inteira, ou em atributos específicos de uma relação. Contudo, não permite autorizações em tuplos específicos de uma relação.
+
+Para revogar uma autorização, usamos a instrução \textit{REVOKE}, que tem uma forma geral análoga à \textbf{GRANT}:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+REVOKE <lista de privilegios>
+ON <nome da relacao ou vista>
+TO <lista de utilizadores/papeis>
+\end{lstlisting}
+
+Para revogarmos os privilégios concedidos previamente escrevemos:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+REVOKE SELECT ON department FROM Aragonez;
+REVOKE UPDATE (budget) ON department FROM Aragonez;
+REVOKE INSERT (budget) ON department FROM Aragonez;
+REVOKE DELETE ON department FROM Aragonez;
+\end{lstlisting}
+
+\subsection{Papéis}
+Consideremos os papéis das várias pessoas no mundo real. Seja um papel por exemplo um instrutor, professor-assistente e estudante exemplos de papéis num contexto universitário. 
+
+Quando um novo instrutor for contratado, um identificador de utilizador terá de ser alocado a ele, e este deve ser identificado com o papel de instrutor, que engloba em si um conjunto de permissões no sistema.
+
+A noção de \textbf{papéis} em SQL captura este conceito - um conjunto de papéis é criado na base de dados, e autorização são concedidas a papéis da mesma forma que são concedidas a utilizadores.
+
+É verdade que poderíamos criar um único utilizador \textit{instrutor} e todos acederem a partir desse mesmo, mas por questões de segurança, é preferível identificar exatamente que instrutor executou uma certa operação sobre a base de dados.
+
+Os \textbf{papéis} em SQL são criados da seguinte maneira:
+\begin{lstlisting}[language=SQL, morekeywords={TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar o papel
+CREATE ROLE instructor;
+
+-- Conceder permissoes
+GRANT SELECT
+ON takes
+TO instructor;
+
+-- Papeis podem ser concedidos a utilizadores bem como a outros papeis
+CREATE ROLE dean;
+GRANT 
+instructor 
+TO dean;
+
+GRANT UPDATE
+ON takes 
+TO dean;
+
+GRANT dean TO Aragonez;
+\end{lstlisting}
+
+Os privilégios de um utilizador/papel consistem em:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Todos os privilégios concedidos diretamente ao utilizador/papel;
+    \item[--] Todos os privilégios concedidos aos papéis que foram concedidos ao utilizador/papel.
+\end{itemize}
+Isto pode criar correntes de papéis, o que deve ser gerido cuidadosamente.
+
+\subsection{Autorização em Vistas}
+Como vimos, as vistas também podem ser alvo de autorização.
+
+Porém, é importante notar que um utilizador que cria uma vista não recebe necessariamente todos os privilégios da vista - só recebe os privilégios que não requiram autorização adicional para além do que o que já possui. Por exemplo, um utilizador que cria uma vista não pode ter a autorização \textbf{UPDATE} numa vista sem tem autorização \textbf{UPDATE} em todas as relações que a vista refere - se o utilizador criar uma vista sem permissões suficientes para tal, o sistema nega-lhe o pedido de criação de vista.
+
+\subsection{Autorização em Esquemas}
+O SQL \textit{standard} especifica um mecanismo de autorização primitivo para o esquema de base de dados: apenas o \textbf{dono do esquema} pode modificá-lo, como criar e remover \textbf{relações}, adicionar ou tirar \textbf{atributos de relações}, bem como adicionar ou tirar \textbf{índices}.
+
+Contudo, o SQL fornece um privilégio \textbf{REFERENCES} que permite a um utilizar declarar chaves secundárias ao criar relações. O privilégio é concedido a atributos específicos como o privilégio \textbf{UPDATE}. Passo a exemplificar:
+\begin{lstlisting}[language=SQL, morekeywords={REFERENCES, TO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+GRANT REFERENCES (dept_name) ON department TO Aragonez;
+\end{lstlisting}
+
+\section{Funções e Procedimentos}
+\subsection{Introdução}
+\begin{definition}[Base de Dados Centrada Em Dados]
+    O desenvolvimento de uma base de dados centrada em dados é uma abordagem de desenvolvimento onde instruções procedimentais (como um sub-programa em qualquer linguagem de programação) pode ser armazenado dentro de uma base de dados também conhecidas como \textbf{stored program} / \textbf{stored routine}.
+\end{definition}
+
+Um \textbf{Persistent Stored Module} (\textbf{PSM}) pode ser de 2 tipos:
+\begin{itemize}
+    \item[--] Uma \textbf{stored function} que \textbf{retorna um valor} mas \textbf{não altera} o estado da base de dados - combina \textit{inputs} e resultados das consultas da base de dados para produzir o \textit{output}.
+    \item[--] Um \textbf{stored procedure} que \textbf{pode mudar} o estado da base de dados e \textbf{não retorna nenhum valor} - consulta e atualiza a base de dados.
+\end{itemize}
+
+As vantagens de usarmos \textbf{PSM}:
+\begin{itemize}
+    \item[--] Torna as aplicações \textbf{mais rápidas}: os PSM são compilados e mantidos dentro da base de dados.
+    \item[--] \textbf{Reduz a troca de dados}: especialmente entre a aplicação e o servidor da base de dados.
+    \item[--] Introduz \textbf{1 nível de indireção}: pode ser chamado por aplicações escritas em linguagens distintas.
+\end{itemize}
+
+As desvantagens de usarmos \textbf{PSM}:
+\begin{itemize}
+    \item[--] \textbf{Debugging} e \textbf{profiling} pode ser extremamente difícil;
+    \item[--] O ambiente de desenvolvimento depende altamente do SGBD usado.
+\end{itemize}
+
+Funções e procedimentos permitem que a "lógica de negócio" seja guardada na base de dados e executada a partir de instruções de SQL. Por exemplo, universidades têm várias regras sobre quantas cadeiras um estudante por detirar ao mesmo tempo num dado semestre. 
+
+\subsection{Declaração e Invocação de Funções e Procedimentos SQL}
+Para definirmos/removermos um procedimento ou uma função:
+\begin{lstlisting}[language=SQL, morekeywords={PROCEDURE, FUNCTION, REPLACE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar
+CREATE [OR REPLACE] PROCEDURE/FUNCTION ...
+-- Remover
+DROP PROCEDURE/FUNCTION ...
+\end{lstlisting}
+
+Para invocarmos um procedimento ou uma função (podem ser chamados a partir de outros procedimentos ou de aplicações a nível do cliente):
+\begin{lstlisting}[language=SQL, morekeywords={CALL}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Chamar procedimento
+CALL procedure_name [(param1, param2, ...)]
+-- Chamar funcao
+my_function_name([param1, param2, ...])
+\end{lstlisting}
+
+\textbf{1)} Seja a seguinte operação: "Cria um procedimento que insere o tipo de gomas preferidas do João Aragonez na relação \textit{aragonez\_senior\_shopping\_list} mediante o seu grau de fome ($<50\%$ são as gomas ácidas, caso contrário são as doces)". Temos:
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE PROCEDURE fome_aragonez(IN grau_fome INTEGER) AS
+
+DECLARE gomas VARCHAR(6);
+BEGIN
+    IF grau_fome < 50
+    THEN
+        SET gomas := 'acidas';
+    ELSE
+        SET gomas := 'doces';
+    END IF;
+    INSERT INTO aragonez_senior_shopping_list
+        VALUES (gomas);
+END
+\end{lstlisting}
+
+É de notar que o PostgreSQL não suporta \textbf{stored procedures} verdadeiros (um \textbf{PROCEDURE} em PostgreSQL é uma \textbf{FUNCTION} que retorna o \textit{type} \textbf{VOID}); apenas \textbf{stored functions} são suportadas.
+
+As \textbf{stored functions} na sua forma geral são:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE FUNCTION my_func([parametros]) 
+RETURNS type AS
+$$
+DECLARE [declaracoes]
+BEGIN
+    [instrucoes]
+END
+$$ LANGUAGE plpgsql;
+\end{lstlisting}
+De notar que o \textbf{PSM} no Postgres permite o \textit{type} ser \textbf{VOID}.
+
+\textbf{2)} Seja a seguinte operação: "Cria uma função que recebe 2 \textit{numeric}'s como \textit{input} e que retorna outro \textit{numeric} correspondente à soma dos dois.". Temos:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE FUNCTION add_nums(
+    x NUMERIC,
+    y NUMERIC) 
+    RETURNS NUMERIC AS
+$$
+BEGIN
+    RETURN x + y;
+END
+$$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+Podemos usar as \textbf{stored functions} nas cláusulas \textbf{SELECT} e \textbf{WHERE}. Exemplificando:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Sem clausula FROM
+SELECT add_me(2, 3);
+
+-- Como uma expressao no SELECT (aplicado a cada tuplo de instructor)
+SELECT name, add_me(salary, 100)
+FROM instructor
+
+-- Como uma expressao no WHERE (aplicado a cada tuplo de instructor)
+SELECT *
+FROM instructor
+WHERE add_me(salary, -1000) < 1000
+\end{lstlisting}
+
+\begin{definition}[Função Determinística]
+Uma função é determinística se produz sempre o mesmo resultado para os mesmos valores de \textit{input}.
+\end{definition}
+Em PostgreSQL, as função são \textbf{não-determinísticas} por defeito, pelo que se quisermos especificar que a função é determinística devemos usar o seguinte comando:
+\begin{lstlisting}[language=SQL, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE, IMMUTABLE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE FUNCTION myfunc([params]) 
+RETURNS type IMMUTABLE
+\end{lstlisting}
+
+As funções e procedimentos permitem a \textbf{declaração de variáveis}, como já vimos, sem complexidade alguma. A sua forma geral é dada por:
+\begin{lstlisting}[language=SQL, deletekeywords={VALUE}, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE, IMMUTABLE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DECLARE var_name [, var_name2 ...] type [DEFAULT value]
+\end{lstlisting}
+Estas são apenas visíveis dentro do scope \textbf{BEGIN} \dots \textbf{END}.
+
+Um pequeno exemplo é dado por:
+\begin{lstlisting}[language=SQL, deletekeywords={VALUE}, morekeywords={FUNCTION, RETURNS, $$, LANGUAGE, DECLARE, IMMUTABLE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DECLARE 
+    first_name VARCHAR(50) DEFAULT 'Joao';
+    last_name VARCHAR(50) DEFAULT 'Aragonez';
+    contador INTEGER := 1; -- eh assim que se fazem atribuicoes em PostgreSQL
+    pagamento NUMERIC(11, 2) := 20.5;
+\end{lstlisting}
+As variáveis podem também ser declaradas para captarem o resultado de uma consulta usando a cláusula \textbf{INTO}. Exemplificando a forma geral:
+\begin{lstlisting}[language=SQL, deletekeywords={VALUE}, morekeywords={INTO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+BEGIN
+    ...
+    SELECT col_name, ...
+    INTO var_name
+    FROM ...
+    ...
+END
+
+\end{lstlisting}
+É rápido para perceber que se quisermos vários atributos de uma relação guardados numa variável declarada, não existe nenhum \textit{type} pré-definido que as albergue sem problemas. Para isso, podemos criar o nosso próprio tipo, representado em baixo um exemplo de um tipo relevante:
+\begin{lstlisting}[language=SQL, morekeywords={CREATE, TYPE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE TYPE gomas_aragonez AS (
+    tipo VARCHAR(6),
+    preco_max NUMERIC(1, 2),
+    perc_acucar NUMERIC(3, 2)
+);
+\end{lstlisting}
+De notar que esta criação de tipos permite também ser fornecido como \textit{type} de retorno de uma \textbf{stored function}.
+
+\subsection{Construtores de Linguagem para Funções e Procedimentos}
+Existem várias instruções dentro do scope \textbf{BEGIN} \dots \textbf{END} da função/do procedimento.
+
+A sintaxe para instruções \textbf{WHILE} e \textbf{REPEAT} é dada por:
+\begin{lstlisting}[language=SQL, morekeywords={CREATE, TYPE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Ciclo WHILE
+WHILE expressao booleana DO
+    sequencia de instrucoes;
+END WHILE
+
+-- Ciclo REPEAT
+REPEAT
+    sequencia de instrucoes;
+UNTIL expressao boleana
+END REPEAT
+
+-- As palavras-chave break, continue e return nos ciclos em PostgreSQL sao dados por
+EXIT -- sai do loop
+CONTINUE -- continua o loop
+RETURN -- sai da funcao (e do loop)
+\end{lstlisting}
+
+Existe ainda um ciclo \textbf{FOR} que permite iterar sobre os resultados de uma consulta:
+\begin{lstlisting}[language=SQL, morekeywords={DECLARE, FOR, DO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DECLARE n INTEGER DEFAULT 0;
+FOR r AS
+    SELECT budget FROM department
+    WHERE dept_name = 'Musica'
+DO
+    SET n = n - r.budget
+END FOR
+\end{lstlisting}
+
+A sintaxe para instruções \textbf{IF-THEN-ELSE} é dada por:
+\begin{lstlisting}[language=SQL, morekeywords={IF, DECLARE, FOR, DO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+IF expressao booleana
+    THEN instrucao ou instrucao composta
+ELSE IF expressao booleana
+    THEN instrucao ou instrucao composta
+ELSE instrucao ou instrucao composta
+END IF
+\end{lstlisting}
+
+Se quiser ter o \textbf{PSM} a retornar \textbf{relações inteiras ou parciais} basta usar na cláusula \textbf{RETURNS} a palavra-chave \textbf{SETOF $<$relação$>$} se a quisermos na íntegra ou \textbf{TABLE(atr\_1 type(atr\_1), ..., atr\_m type(atr\_m))} se quisermos uma tabela parcialmente, assumindo que $m < n$, onde $n$ é o número de nomes de atributos diferentes na relação.
+
+Para ter o \textbf{PSM} a retornar \textbf{apenas um tuplo da relação} basta declarar uma variável do seguinte modo:
+\begin{lstlisting}[language=SQL, morekeywords={$$, RETURNS, DECLARE, ROWTYPE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+...
+RETURNS table_name AS
+$$
+DECLARE
+    var_name table_name%ROWTYPE
+\end{lstlisting}
+
+\subsection{Blocos DO}
+Os blocos \textbf{DO} executam uma função anónima (sem qualquer nome atribuído). Eis um exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={DECLARE, FOR, DO, $$, RAISE, INFO}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+DO $$
+DECLARE total NUMERIC DEFAULT 0;
+BEGIN
+    SELECT sum(salary)
+    INTO total
+    FROM instructor;
+    RAISE INFO 'Total salarios pagos a instrutores --> %', total;
+END
+$$;
+\end{lstlisting}
+
 \chapter{Teoria da Normalização}
 
 Na conceção do modelo E-A, há certas decisões que se tomam que têm um grande impacto tanto ao nível lógico como ao nível físico e que se só são detetadas no modelo Relacionalm, obrigando por vezes a um processo iterativo de sucessivas reformulações do modelo E-A. Essas qualidades prendem-se com questões de \textbf{redundância e independência de atributos} das relações.
@@ -1570,12 +2012,6 @@ O seguinte algoritmo garante a conversão de uma \textbf{qualquer relação $R$}
 
 
 
-
-
-
-
-
-
 \chapter{Transações}
 \section{Introdução às Transações}
 \begin{definition}[Transação]
@@ -1591,7 +2027,7 @@ Existem 2 questões a resolver nas transações:
 Existem, como tal, 3 caminhos possíveis para a conclusão de uma transação:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap3/caminhos_transacoes.png}
+    \includegraphics[scale = 0.4]{cap4/caminhos_transacoes.png}
     \caption{3 caminhos possíveis de uma transação}
 \end{figure}
 
@@ -1607,7 +2043,7 @@ As transações tem 4 grandes propriedades (\textbf{ACID}):
 Podemos esquematizar uma transação com o seguinte diagrama de estados:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap3/diagrama_estados_trans.png}
+    \includegraphics[scale = 0.4]{cap4/diagrama_estados_trans.png}
     \caption{Diagrama de estados de uma transação}
 \end{figure}
 
@@ -1687,7 +2123,7 @@ Definimos ainda sobre os níveis de isolamento em SQL:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap3/isolamento_transacoes.png}
+    \includegraphics[scale = 0.4]{cap4/isolamento_transacoes.png}
     \caption{Consistência e Isolamento em SQL}
 \end{figure}
 
