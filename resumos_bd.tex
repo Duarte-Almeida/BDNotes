@@ -24,7 +24,7 @@
 \makeatletter
 \renewcommand{\ALG@name}{Algoritmo}
 
-\newtheorem{theorem}{Teorem}
+\newtheorem{theorem}{Teorema}
 \newtheorem{lemma}{Lema}
 
 \lstset{inputencoding=utf8/latin1}
@@ -292,8 +292,8 @@ CREATE TABLE r
 O SQL suporta uma variedade de \textbf{restrições de integridade}. Algumas delas são:
 \begin{itemize}
     \itemsep0cm
-    \item[--]\textbf{primary key} ($A_{j}_{1}, A_{j}_{2}, ..., A_{j}_{m}$): esta especificação diz que os atributos $A_{j}_{1}, A_{j}_{2}, ..., A_{j}_{m}$ formam a chave primária da relação - por definição estes devem ser \textbf{NOT NULL} e \textbf{UNIQUE}, i.e., nenhum tuplo pode ter um valor \textbf{null} como atributo de chave primária, e não existem 2 tuplos numa relação com atributos de chave primária iguais. Esta especificação é \textbf{opcional}.
-    \item[--]\textbf{foreign key} ($A_{k}_{1}, A_{k}_{2}, ..., A_{k}_{n}$) \textbf{references} \textit{s}: esta especificação diz que os valores dos atributos ($A_{k}_{1}, A_{k}_{2}, \\ ..., A_{k}_{n}$) para qualquer tuplo na relação devem corresponder aos atributos de chave primária de algum tuplo da relação \textit{s}.
+    \item[--]\textbf{primary key} ($A_{j_{1}}, A_{j_{2}}, ..., A_{j_{m}}$): esta especificação diz que os atributos $A_{j_{1}}, A_{j_{2}}, ..., A_{j_{m}}$ formam a chave primária da relação - por definição estes devem ser \textbf{NOT NULL} e \textbf{UNIQUE}, i.e., nenhum tuplo pode ter um valor \textbf{null} como atributo de chave primária, e não existem 2 tuplos numa relação com atributos de chave primária iguais. Esta especificação é \textbf{opcional}.
+    \item[--]\textbf{foreign key} ($A_{k_{1}}, A_{k_{1}}, ..., A_{k_{n}}$) \textbf{references} \textit{s}: esta especificação diz que os valores dos atributos ($A_{k_{1}},A_{k_{2}}, \\ ..., A_{k_{n}}$) para qualquer tuplo na relação devem corresponder aos atributos de chave primária de algum tuplo da relação \textit{s}.
     \item[--]\textbf{not null}: esta especificação aplica-se a um atributo e especifica que o valor \textbf{null} não é permitido nele, i.e., excluir o valor \textbf{null} do domínio do mesmo.
 \end{itemize}
 O SQL previne qualquer atualização à base de dados que viole uma restrição de integridade.\\
@@ -360,7 +360,7 @@ CREATE TABLE teaches
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT name
 FROM instructor;
-\end{lstlisting} \\
+\end{lstlisting} 
 \textbf{2)} Seja a seguinte consulta: "Encontra os nomes de departamento de todos os instrutores.". Dado que mais do que 1 instrutor pode pertencer ao mesmo departamento, o mesmo nome de departamento pode aparecer múltiplas vezes na relação \textit{instructor}. Como tal, interessa-nos forçar a eliminação de duplicados na relação resultante da consulta. Para tal:
 
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
@@ -379,7 +379,7 @@ FROM instructor;
 SELECT name
 FROM instructor
 WHERE dept_name='Engenharia Informática' AND salary > 2000;
-\end{lstlisting} \\
+\end{lstlisting}
 De notar que o SQL permite o uso de conectores lógicos \textbf{and}, \textbf{or} e \textbf{not} na cláusula \textbf{WHERE}. Os operandos dos conectores lógicos podem ser expressões envolvendo operadores de comparação $<, \leq, >, \geq, =$ e $<>$, permitindo-nos comparar cadeias de caracteres e expressões aritméticas, bem como tipos especiais, como uma data.
 
 \subsection{Consultas em N Relações}
@@ -390,7 +390,7 @@ As consultas por vezes precisam de acesso a informação de múltiplas relaçõe
 SELECT name, instructor.dept_name, building
 FROM instructor, department
 WHERE instructor.dept_name = department.dept_name;
-\end{lstlisting} \\
+\end{lstlisting} 
 De notar que como o atributo \textit{dept\_name} ocorre em ambas as relações, o prefixo \textit{instructor.dept\_name} é necessário para tornar claro qual o atributo a que nos estamos a referir. Como \textit{name} e \textit{building} só aparecem em 1 das relações não é necessário o seu prefixo.
 
 Podemos assim definir o papel de cada cláusula:
@@ -757,7 +757,7 @@ WHERE semester=2 AND year=2017 AND
 \end{lstlisting}
 
 De notar que os operadores \textbf{IN} e \textbf{NOT IN} podem também ser usados em conjuntos enumerados. Por exemplo, \\
-\textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo nome não é "Mozart" nem "Einstein\"\". Temos:
+\textbf{2)} Seja a seguinte consulta: "Encontra o nome de todos os instrutores cujo nome não é "Mozart" nem "Einstein"". Temos:
 \begin{lstlisting}[language=SQL, morekeywords={REFERENCES, REFRESH, MATERIALIZED, CONCURRENTLY}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
 SELECT DISTINCT name
 FROM instructor
@@ -2006,6 +2006,8 @@ O seguinte algoritmo garante a conversão de uma \textbf{qualquer relação $R$}
  A última instrução do bloco \textit{while} corresponde a uma decomposição \textit{lossless} pelo teorema de \textit{Heath}: $Q \gets \{(Q \setminus Y), (X \cup Y)\}$ . A propriedade da sucessão de decomposições \textit{lossless} juntamente com o facto de que cada iteração diminui em pelo menos um atributo duas relações de $D$ e que, no limite, relações com apenas 2 atributos não geram quaisquer redundância, tem-se que o algoritmo garante a conversão para a $BCNF$ em tempo $O(|R|)$. \\
 
  \textit{Nota: Existe um algoritmo que gera uma decomposição tanto lossless como preservadora de dependências para conversão para a 3NF}
+
+ \chapter{Índices}
 
 
 
