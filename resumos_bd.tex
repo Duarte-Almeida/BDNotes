@@ -15,8 +15,12 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{subfig}
+\usepackage{multirow}
+
 \usepackage{caption}
-\usepackage{subcaption}
 
 
 \algnewcommand\algorithmicforeach{\textbf{for each}}
@@ -209,6 +213,7 @@ O processo de conceção de um base de dados incide inicialmente no \textbf{dese
 \section{Utilizadores de Bases de Dados}
 
 \begin{itemize}
+    \itemsep0cm
     \item[--] \textbf{Implementadores de Bases de Dados;}
     \item[--] \textbf{Utilizadores das aplicações;} 
     \item[--]\textbf{Programadores de aplicações} ao definirem o modelo lógico do sistema de informação;
@@ -432,7 +437,7 @@ O produto Cartesiano resultante combina tuplos que não têm qualquer tipo de re
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap2/prod_cartesiano.png}
+    \includegraphics[scale = 0.4]{cap_sql/prod_cartesiano.png}
     \caption{Produto cartesiano da relação \textit{instructor} com a relação \textit{teaches}}
 \end{figure}
 
@@ -1161,7 +1166,7 @@ Eis uma lista que mostra que os vários tipos de \textbf{JOIN} (\textbf{INNER}, 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.5]{cap2/join_tipos_conds.png}
+    \includegraphics[scale = 0.5]{cap_sql/join_tipos_conds.png}
     \caption{Tipos e Condições de \textbf{JOIN}}
 \end{figure}
 
@@ -1512,12 +1517,14 @@ GRANT REFERENCES (dept_name) ON department TO Aragonez;
 
 Um \textbf{Persistent Stored Module} (\textbf{PSM}) pode ser de 2 tipos:
 \begin{itemize}
+    \itemsep0cm
     \item[--] Uma \textbf{stored function} que \textbf{retorna um valor} mas \textbf{não altera} o estado da base de dados - combina \textit{inputs} e resultados das consultas da base de dados para produzir o \textit{output}.
     \item[--] Um \textbf{stored procedure} que \textbf{pode mudar} o estado da base de dados e \textbf{não retorna nenhum valor} - consulta e atualiza a base de dados.
 \end{itemize}
 
 As vantagens de usarmos \textbf{PSM}:
 \begin{itemize}
+    \itemsep0cm
     \item[--] Torna as aplicações \textbf{mais rápidas}: os PSM são compilados e mantidos dentro da base de dados.
     \item[--] \textbf{Reduz a troca de dados}: especialmente entre a aplicação e o servidor da base de dados.
     \item[--] Introduz \textbf{1 nível de indireção}: pode ser chamado por aplicações escritas em linguagens distintas.
@@ -1525,6 +1532,7 @@ As vantagens de usarmos \textbf{PSM}:
 
 As desvantagens de usarmos \textbf{PSM}:
 \begin{itemize}
+    \itemsep0cm
     \item[--] \textbf{Debugging} e \textbf{profiling} pode ser extremamente difícil;
     \item[--] O ambiente de desenvolvimento depende altamente do SGBD usado.
 \end{itemize}
@@ -1720,6 +1728,412 @@ END
 $$;
 \end{lstlisting}
 
+
+
+\section{Triggers}
+\begin{definition}
+    Um trigger é uma instrução que o sistema executa automaticamente aquando de uma modificação na base de dados (operações como \textbf{INSERT, UPDATE} ou \textbf{DELETE}).
+\end{definition}
+
+Para definirmos um trigger devemos:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Especificar quando é que o trigger é suposto ser executado. Isto decompõe-se num \textit{evento} que causa o trigger a ser verificado e uma \textit{condição} deve ser satisfeita para a execução do trigger proceder.
+    \item[--] Especificar as \textit{ações} a tomar quando o trigger executar.
+\end{itemize}
+Diz-se então que os triggers são especificados usando as regras \textbf{\textit{event-condition-action}}.
+
+\subsection{Necessidade de Triggers}
+Os triggers podem ser usados para:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] Implementar certas \textbf{restrições de integridade};
+    \item[--] \textbf{Agir automaticamente} mediante a junção de certas condições bem definidas - estas ações podem ser atualizar/mudar/replicar relações, tirar medidas de estatística, etc.
+\end{itemize}
+
+\subsection{Triggers em SQL}
+Como sabemos, um trigger é um procedimento que é automaticamente invocado em resposta a certas atualizações da base de dados.
+
+A sua sintaxe em SQL é dada por:
+
+\begin{lstlisting}[language=SQL, morekeywords={TRIGGER, BEFORE, AFTER, FOR, EACH, ROW, STATEMENT, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar um trigger
+CREATE TRIGGER <nome_trigger>
+    { BEFORE | AFTER } { INSERT | UPDATE | DELETE }
+ON <nome_relacao ou nome_vista>
+WHEN <condicao>
+FOR EACH { ROW | STATEMENT } EXECUTE PROCEDURE <nome_proc>
+
+-- Remover um trigger
+DROP TRIGGER <nome_trigger> ON <nome_relacao ou nome_vista> [IF EXISTS]
+\end{lstlisting}
+
+\textbf{1)} Seja a seguinte operação: "Cria um trigger que não permite que o salário de um instrutor seja abaixo de 800 nem acima de 3000.". Temos:
+
+\begin{lstlisting}[language=SQL, morekeywords={TRIGGER, REPLACE, FUNCTION, RETURNS, $$, IF, NEW, ELSEIF, ENDIF, RETURN, NEW, LANGUAGE, AFTER, FOR, EACH, ROW, PROCEDURE, BEFORE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Criar o procedimento a executar aquando de um trigger
+CREATE OR REPLACE FUNCTION verf_salario_proc()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.balance < 800 THEN
+        NEW.balance := 800;
+    ELSEIF NEW.balance > 3000 THEN 
+        NEW.balance := 3000;
+    ENDIF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Definir o trigger
+CREATE TRIGGER verf_salario_trigger
+    BEFORE INSERT
+    ON instructor
+    FOR EACH ROW
+    EXECUTE PROCEDURE verf_salario_proc();
+\end{lstlisting}
+
+O comportamento dos triggers mediante serem \textbf{BEFORE} ou \textbf{AFTER} da operação que modifica a base de dados é resumido em:
+
+\begin{table}[H]
+\begin{tabular}{l|c|c|}
+\cline{2-3}
+& BEFORE & AFTER \\ \hline
+\multicolumn{1}{|l|}{\cellcolor[HTML]{C1FFC1}ACTIVATION} & \begin{tabular}[c]{@{}c@{}}O trigger é ativado 1 vez\\ para cada tuplo ou instrução.\end{tabular}                         & \begin{tabular}[c]{@{}c@{}}O trigger é ativado 1 vez para\\ cada tuplo ou instrução sse:\\ - Todos os triggers BEFORE na\\ mesma relação e os relativos à\\ mesma operação são executados\\ com sucesso;\\ - A operação foi executada com \\ sucesso.\end{tabular} \\ \hline
+\multicolumn{1}{|l|}{\cellcolor[HTML]{FFCCC9}FAILURE}    & \begin{tabular}[c]{@{}c@{}}A operação na fila/relação\\ não é executada.\\ Nenhum trigger AFTER é\\ ativado.\end{tabular} & \begin{tabular}[c]{@{}c@{}}A operação na fila/relação\\ não é executada.\end{tabular} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Problemas dos Triggers}
+Os triggers têm \textit{um efeito complexo}, por vezes imprevisível, pois vários triggers podem serem ativados numa única operação e a ação de um trigger pode ativar outro (\textbf{triggers recursivos}).
+
+Podem, como tal, gerar \textit{ciclos de eventos}, com muita dificuldade em depurar e corrigir, bem como instanciar \textit{execuções indesejadas} pois mudanças a uma tabela podem gerar triggers por cadeia que não eram intencionados serem executados.
+
+Se \textit{ocorrerem erros} e o trigger falhar, a operação inteira falha, e é complexa a sua recuperação de falta.
+
+\subsection{Quando Não Usar Triggers}
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textit{Tabelas de Resumo}: usar \textbf{VIEW}s em vez de \textbf{TRIGGER}s, se possível;
+    \item[--] \textit{Restrições de Integridade Complexas}: usar \textbf{CHECK}s sempre que possível;
+    \item[--] \textit{Replicação de Relações}: usar os mecanismos embutidos do SGBD.
+\end{itemize}
+
+\chapter{Desenvolvimento de Aplicações com Bases de Dados}
+A maneira mais comum dos utilizadores interagirem com bases de dados é através de \textit{programas aplicacionais} que fornecem uma interface ao utilizador no \textit{frontend} e interfaces com a base de dados no \textit{backend}.
+
+\section{Programas Aplicacionais e Interfaces de Utilizador}
+Um \textit{programa aplicacional} típico contém uma componente \textit{frontend}, que lida com a interface do utilizador, uma componente \textit{backend}, que comunica com a base de dados, e uma \textit{middle layer}, que contém lógica de negócio, i.e., código que executa pedidos específicos para informação ou atualizações - os comandos SQL podem ser invocados através de qualquer aplicação informática, escrita em qualquer linguagem (\textit{Java, C, PHP, Python, ...}).
+
+Para evitar acesso direto do utilizador à base de dados, que compromete a segurança da mesma, e para haver um único ponto de mudança, i.e., se um utilizador fizer uma mudança local, esta está automaticamente disponível aos demais utilizadores da aplicação e estes não precisarem de descarregar/atualizar a aplicação localmente, usam-se 2 abordagens:
+
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textit{Web browsers} oferecem uma \textbf{\textit{frontend} universal} - usam HTML (\textbf{linguagem \textit{markup}}) como sintaxe e apresentam o conteúdo das páginas de forma "gráfica" ao utilizador.
+    \item[--] Os programas são instalados localmente, mas comunicam com as aplicações \textit{backend} através de uma \textbf{API} e não têm acesso direto à aplicação - é mais usada em aplicações móveis e o seu resultado é normalmente \textbf{XML}.
+\end{itemize}
+
+O modelo de arquitetura de aplicações \textit{web} lecionado na cadeira é o seguinte:
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Arquitetura Aplicação Web]{{\includegraphics[width=8.1cm]{cap_web/arquitetura_web.png} }}%
+    \qquad
+    \subfloat[\centering Distribuição Física]{{\includegraphics[width=8.1cm]{cap_web/dist_fisica.png} }}%
+    \caption{Aplicações Web em BD}%
+    \label{fig:example}%
+\end{figure}
+
+\section{Acesso a SQL numa Linguagem de Programação}
+Existem 2 abordagens para aceder a SQL numa linguagem de programação:
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{SQL dinâmico}: permite o programa construir consultas SQL como uma cadeia de caracteres em \textit{runtime}, submeter a consulta e colocar o resultado em variáveis do programa, um tuplo de cada vez.
+    \item[--] \textbf{SQL embutido}: as instruções SQL são identificadas em tempo de compilação usando um pré-processamento que traduz os pedidos feito em SQL embutido em chamadas de funções.
+\end{itemize}
+
+\subsection{SQL Embutido}
+Uma linguagem na qual consultas SQL são embutidas é referida como a \textit{linguagem host}, e as estruturas SQL permitidas na \textit{linguagem host} constituem o \textbf{SQL embutido}.
+
+Programas escritos na \textit{linguagem host} podem usar SQL embutido para aceder e atualizar dados guardados na base de dados - existe um pré-processamento feito antes da compilação que transforma pedidos SQL embutidos com declarações na \textit{linguagem host} e chamadas a procedimentos que permitem o acesso à base de dados durante o \textit{runtime}.
+
+Para identificar pedidos SQL embutidos ao pré-processador, usamos a instrução \textbf{EXEC SQL}, com a forma geral:
+
+\begin{lstlisting}[language=SQL, morekeywords={TRIGGER, REPLACE, FUNCTION, RETURNS, $$, IF, NEW, ELSEIF, ENDIF, RETURN, NEW, LANGUAGE, AFTER, FOR, EACH, ROW, PROCEDURE, BEFORE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+EXEC SQL <instrucao SQL embutida>;
+\end{lstlisting}
+
+Inicialmente, o programa deve-se conectar à base de dados:
+\begin{lstlisting}[language=SQL, morekeywords={char*, EXEC, SQL, CONNECT, IDENTIFIED, DECLARE, SECTION}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Para o exemplo iremos usar C como linguagem host
+-- Declaracao de variabeis
+char* gomas = "Gomas! Yummy!";
+EXEC SQL BEGIN DECLARE SECTION
+char* username = "Aragonez";
+char* password = "Joao";
+EXEC SQL END DECLARE SECTION
+-- Conexao ah base de dados
+EXEC SQL CONNECT :username IDENTIFIED BY :password
+-- Codigo C
+printf("%s\n", gomas);
+\end{lstlisting}
+
+Como vimos, as variáveis da \textit{linguagem host} podem ser usadas em instruções de SQL embutido, mas têm de ser precedidos por dois pontos (:), para as distinguir das variáveis do SQL embutido (\textbf{SQLCODE} que é um \textit{long} que retorna negativo se existir um erro e \textbf{SQLSTATE} que é uma cadeia de caracteres que indica o tipo de erro).
+
+Para iterar sobre os resultados de uma consulta SQL embutido, devemos declarar uma variável \textbf{CURSOR}, que pode ser aberto, e buscar comandos emitidos num loop da \textit{linguagem host} para buscar linhas consecutivas do resultado da consulta - atributos da linha podem ser metidas em variáveis da \textit{linguagem host}.
+
+Exemplificamos agora com um programa em C que usa SQL embutido:
+\begin{lstlisting}[language=SQL, morekeywords={char*, EXEC, SQL, CONNECT, IDENTIFIED, DECLARE, SECTION, CURSOR, FOR, short, FETCH, CLOSE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Declaracao de variabeis
+char SQLSTATE[6]; -- variavel do SQL embutido
+EXEC SQL BEGIN DECLARE SECTION
+char c_iname[30];
+short c_minsalary;
+float c_iage;
+EXEC SQL END DECLARE SECTION
+c_minsalary = random();
+-- Declarar o cursor para a consulta SQL embutida
+EXEC SQL DECLARE iinfo CURSOR FOR
+    SELECT name, age
+    FROM instructor
+    WHERE salary > :c_minsalary
+    ORDER BY name;
+-- Ciclo na linguagem host para dar fetch
+do {
+    EXEC SQL FETCH iinfo INTO :c_iname, :c_age; -- dar fetch p variaveis locais
+    printf("%s is %d years old!\n", c_iname, c_age); -- codigo C puro
+} while (SQLSTATE != '02000');
+EXEC SQL CLOSE iinfo; -- fechar o cursor
+\end{lstlisting}
+
+Podemos ainda usar a instrução SQL \textbf{PREPARE} para executar instruções de SQL embutido pré-definidas, como por exemplo:
+\begin{lstlisting}[language=SQL, morekeywords={char*, EXEC, SQL, CONNECT, IDENTIFIED, DECLARE, SECTION, CURSOR, FOR, short, FETCH, CLOSE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+-- Variavel da linguagem host com instrucao SQL embutida definida
+char c_sqlstring[] = {"DELETE FROM instructor WHERE age > 65"};
+-- Correr a instrucao da variavel
+EXEC SQL PREPARE foobar FROM :c_sqlstring
+EXEC SQL EXECUTE foobar
+\end{lstlisting}
+
+\section{Programação de Aplicação Web}
+A \textbf{Common Gateway Interface (CGI)} define como é que um servidor web comunica com programas aplicacionais. Por sua vez, os programas aplicacionais comunicam com um servidor de base de dados atráveis de \textbf{ODBC/JDBC}.
+
+Como o protocolo \textbf{HTTP} é \textit{connectionless} não existe ligação contínua entre o cliente e o servidor web - quando o servidor recebe um pedido, uma conexão é temporariamente criada que permite a troca de mensagens entre o cliente e o servidor.
+
+Em contraste, quando um utilizador se liga a uma base de dados usando textbf{ODBC/JDBC}, uma sessão é criada e até esta ser terminada toda a informação de sessão é mantida no servidor.
+
+Como as aplicações web (na sua maioria) necessitam de informação de sessão para permitir interagir eficientemente com o utilizador, utilizam-se \textbf{cookies} (já se viu isto em RC, não é relevante explicar como funcionam).
+
+\subsection{Introdução a Scripting, Framework e Driver}
+Usamos \textbf{\textit{scripting languages}} e \textbf{\textit{application frameworks}} para processar pedidos no servidor aplicacional.
+
+Em \textbf{server-side scripting}, antes de entregar uma página \textit{Web} ao cliente, o servidor executa os \textit{scripts} embutidos nos conteúdos HTML da página. Cada pedaço do \textit{script}, quando executado, pode gerar texto que é adicionado à página (ou até mesmo apagar). O código-fonte é apagado da página, pelo que o cliente poderá nem saber que havia código nele antes. O \textit{script} executado pode conter código SQL que é executado sobre uma base de dados, bem como usar diretamente valores de input de formulários HTML preenchidos pelo cliente nas consultas SQL.
+
+Em \textbf{client-side scripting}, os browsers conseguem buscar certos scripts do lado do cliente, ou até mesmo programas ou documentos, e executá-los de um "modo seguro" no lado do cliente, como é exemplo de certos scripts \textit{Javascript}, \textit{Adobe Flash} usado para animações/jogos, etc.
+
+O Python oferece 2 frameworks para \textit{server-side scripting}: \textbf{Flask} e \textit{Django}. Oferece ainda um \textit{driver} como modelo de acesso a SGBD: \textbf{Psycopg}.
+
+\subsection{Flask \& Psycopg}
+Deixo aqui um fluxo da execução de um servidor Web que opera em conjunto com uma SGBD:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{cap_web/server_web_sgbd.png}
+\end{figure}
+A figura acima pode ser legendada da seguinte forma:
+\begin{enumerate}
+    \itemsep0cm
+    \item O cliente realiza um pedido através do protocolo HTTP ao servidor Web;
+    \item O servidor Web tenciona executar um programa externo (\textit{script CGI}) escrito numa \textit{scripting language} (Python neste caso);
+    \item O servidor Web acede ao sistema de ficheiro local para encontrar o \textit{script} localmente;
+    \item O sistema de ficheiros fornece o código Python para ser executado.
+    \item Quaisquer consultas SQL que estejam no código são agora realizadas, havendo comunicação com o SGBD;
+    \item O SGBD retorna os resultados das consultas;
+    \item Os resultados são transformados em HTML e o \textit{server-side script} é apagado da página fonte;
+    \item A página é devolvida ao cliente.
+\end{enumerate}
+
+Escrevamos agora o nosso \textit{script} usando o framework \textbf{Flask} e o driver \textbf{Psycopg}:
+
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+#!/user/bin/python3 ## IMPRESCINDIVEL
+from wsgiref.handlers import CGIHandler
+from flask import Flask
+import psycopg2
+import psycopg2.extras
+
+## Configuracao do SGBD (Psycopg)
+DB_HOST = "db.tecnico.ulisboa.pt"
+DB_USER = "aragonez"
+DB_DATABASE = "aragonez_db"
+DB_PASSWORD = "joao"
+DB_CONNECTION_STRING = "host=%s dbname=%s user=%s password=%s" % (
+    DB_HOST,
+    DB_DATABASE,
+    DB_USER,
+    DB_PASSWORD,
+)
+
+## Configuracao do Framework (Flask)
+app = Flask(__name__)
+## Pagina principal mostra o index
+@app.route("/") ## Decorator - adiciona funcionalidade ao codigo existente
+def index():
+    try:
+        return render_template("index.html") ## render_template built-in do Flask
+    except Exception as e:
+        return str(e)
+
+## Criar uma categoria
+@app.route("/criar_categoria", methods=["POST"]) ## POST pq o cliente enviou dados ao servidor atraves do form
+def executar_criar_categoria():
+    dbConn = None
+    cursor = None
+    try:
+        ## ligar ah bd
+        dbConn = psycopg2.connect(DB_CONNECTION_STRING)
+        cursor = dbConn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        ## processamento do input do cliente
+        name = request.form['category_to_add']
+        if (request.form['category_type'] == 'Simple Category'):
+            query = "INSERT INTO categoria_simples VALUES (%s);"
+        else:
+            query = "INSERT INTO super_categoria VALUES (%s);"
+        cursor.execute(query, (name, ))
+        query = "INSERT INTO categoria VALUES (%s);"
+        cursor.execute(query, (name, ))
+        return query ## Retorna o resultado da query como string para o HTML
+    except Exception as e:
+        return str(e)
+    finally:
+        dbConn.commit()
+        cursor.close()
+        dbConn.close()
+
+## Listar os produtos
+@app.route('/listar_produtos')
+def listar_produtos():
+    dbConn = None
+    cursor = None
+    try:
+        dbConn = psycopg2.connect(DB_CONNECTION_STRING)
+        cursor = dbConn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = "SELECT * FROM product;"
+        cursor.execute(query)
+        return render_template("listar_produtos.html", cursor=cursor)
+    except Exception as e:
+        return str(e)
+    finally:
+        dbConn.commit()
+        cursor.close()
+        dbConn.close()
+
+## IMPERATIVO ESTAR PRESENTE
+CGIHandler().run(app)
+\end{lstlisting}
+
+Na função em que listamos os produtos, o código chama a função \textit{render\_template} embutida no próprio \textbf{Flask}. Este procura os \textit{templates} pelo nome do ficheiro dado na pasta \textit{templates}.
+
+O \textbf{Flask} por sua vez usa o \textbf{Jinja2} como seu motor de \textit{templates}. Eis alguns dos \textbf{delimitadores} importantes do mesmo:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] $\{\% ... \%\}$ declarações, ex.: if, for, while;
+    \item[--] $\{\{ ... \}\}$ para expressões a serem substituídas na página gerada;
+    \item[--] $\{\# ... \#\}$ para comentários que não devem ser incluídos na página gerada;
+    \item[--] $\#$ para uma linha que contém uma instrução
+\end{itemize}
+
+Exemplo simples da utilização destes delimitadores (\textit{listar\_produtos.html}):
+\begin{lstlisting}[language=html, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+<!doctype html>
+<title> Listar Produtos - Flask</title> <body style="padding:20px">
+{% if cursor %}
+    <table border="2px">
+    <thead> <tr>  <th>EAN</th> <th>Descricao</th> <th>Alterar</th> </thead>
+    <tbody>
+        {% for record in cursor %}
+            <tr> <td>{{record[0]}}</td> <td>{{record[1]}}</td> <td><a href="description?product_ean={{record[0]}}">Alterar Descricao</a> </td> </tr>
+        {% endfor %}
+    </tbody> </table>
+{% else %}
+    <p> Erro: Falha a obter dados da base de dados! </p>
+{% endif %}
+\end{lstlisting}
+
+Se notarmos, a terceira entrada da tabela a partir da esquerda (começando em 1) permite alterar a descrição de um produto. Para isso usa um \textbf{href} que leva para uma nova página \textit{description} e leva como argumento o EAN do produto em questão. Agora basta extender o script \textit{CGI} em \textbf{Flask} para permitir realmente mudar a descrição:
+
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+...
+
+## Configurar o routing para /description
+@app.route("/description")
+def change_description():
+    try:
+        ## params = request.args = records[0] passado no listar_produtos.html
+        return render_template("description.html", params=request.args)
+    except Exception as e:
+        return str(e)
+\end{lstlisting}
+
+Definimos agora o \textit{template} \textit{description.html}:
+\begin{lstlisting}[language=html, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+<html>
+    <body>
+        <h3>Alterar descricao do produto "{{ params.get("product_ean") }}"</h3>
+        <!-- Falta-nos agora usar isto no Flask-->
+        <form action="update_desc" method="post">
+            <p><input type="hidden" name="ean" value="{{ params.get("product_ean")}}"/></p>
+            <p>Nova descricao: <input type="text" name="description"/></p>
+            <p><input type="submit" value="Submeter"/></p>
+        </form>
+    </body>
+</html>
+\end{lstlisting}
+
+E completamos por fim o \textit{CGI}:
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+...
+
+## Configurar o routing para /description
+@app.route("/update_desc", methods=["POST"])
+def update_description():
+    dbConn = None
+    cursor = None
+    try:
+        dbConn = psycopg2.connect(DB_CONNECTION_STRING)
+        cursor = dbConn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        query = f"UPDATE product SET description={request.form["description"]} WHERE ean='{request.form["ean"]}';" ## SUJEITO A INJECAO SQL
+        cursor.execute(query)
+        return query
+    except Exception as e:
+        return str(e)
+    finally:
+        dbConn.commit()
+        cursor.close()
+        dbConn.close()
+\end{lstlisting}
+
+\subsection{Injeção SQL}
+O problema com o código acima é que imaginando que no \textit{input} do cliente na \textit{description} do formulário HTML, este mesmo escreve:
+\begin{verbatim}
+'new_descr' WHERE ean='111'; UPDATE users SET admin = 'true' WHERE username = 'Aragonez';
+\end{verbatim}
+Isto irá correr diretamente ao executarmos \textit{cursor.execute(query)}, o que representa grandes riscos de segurança.
+
+Em \textbf{Psycopg}, a maneira correta de executar consultas SQL é da seguinte forma:
+\begin{lstlisting}[language=python, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+query = "UPDATE product SET description=%s WHERE ean=%s"
+data = (request.form["description"], request.form["ean"])
+cursor.execute(query, data)
+\end{lstlisting}
+
+Outras recomendações básicas de segurança para evitar injeções SQL são:
+\begin{itemize}
+    \itemsep 0cm
+    \item \textit{Forms} com \textit{method = POST} (e não \textit{GET});
+    \item Instruções \textbf{PREPARED};
+    \item SSL;
+    \item Certificados.
+\end{itemize}
+
 \chapter{Teoria da Normalização}
 
 Na conceção do modelo E-A, há certas decisões que se tomam que têm um grande impacto tanto ao nível lógico como ao nível físico e que se só são detetadas no modelo Relacionalm, obrigando por vezes a um processo iterativo de sucessivas reformulações do modelo E-A. Essas qualidades prendem-se com questões de \textbf{redundância e independência de atributos} das relações.
@@ -1889,6 +2303,7 @@ Uma relação encontra-se na 2ª forma normal se e só se se encontrar na 1º fo
 A conversão de uma relação na 1ª forma normal para a 2ª forma normal faz-se do seguinte modo:
 
 \begin{itemize}
+    \itemsep0cm
     \item[--] Para cada atributo não chave $R_n$ que \textbf{depende parcialmente} de um subconjunto de atributos chave de uma chave $K$, $S \subseteq K$, retirá-lo da relação inicial $R$ e criar uma nova relação com chave primária $S$ e com esquema $(S, R_n)$. Mais formalmente, ocorre a seguinte decomposição da relação inicial $R$: 
     \[
         R \gets \{R \setminus R_n,\:  (S, R_n)\}
@@ -1911,6 +2326,7 @@ Uma relação encontra-se na 3ª forma normal se e só se se encontrar na 2º fo
 A conversão de uma relação na 2ª forma normal para a 3ª forma normal faz-se do seguinte modo:
 
 \begin{itemize}
+    \itemsep0cm
     \item[--] Para cada atributo não chave $R_n$ que depende funcionalmente num conjunto de atributos não-chave $N$, retirá-lo da relação inicial $R$ e criar uma nova relação com chave primária $N$ e com esquema $(N, R_n)$. Mais formalmente, ocorre a seguinte decomposição da relação inicial $R$: 
     \[
         R \gets \{R \setminus R_n,\:  (N, R_n)\}
@@ -2005,11 +2421,447 @@ O seguinte algoritmo garante a conversão de uma \textbf{qualquer relação $R$}
 
  A última instrução do bloco \textit{while} corresponde a uma decomposição \textit{lossless} pelo teorema de \textit{Heath}: $Q \gets \{(Q \setminus Y), (X \cup Y)\}$ . A propriedade da sucessão de decomposições \textit{lossless} juntamente com o facto de que cada iteração diminui em pelo menos um atributo duas relações de $D$ e que, no limite, relações com apenas 2 atributos não geram quaisquer redundância, tem-se que o algoritmo garante a conversão para a $BCNF$ em tempo $O(|R|)$. \\
 
- \textit{Nota: Existe um algoritmo que gera uma decomposição tanto lossless como preservadora de dependências para conversão para a 3NF}
-
- \chapter{Índices}
+\textit{Nota: Existe um algoritmo que gera uma decomposição tanto lossless como preservadora de dependências para conversão para a 3NF}
 
 
+
+\chapter{Índices}
+
+Quando se pretende procurar registos numa tabela, uma abordagem passaria por ler toda a tabela e todos os seus conteúdos. Contudo, tal seria demasiado ineficiente para \textit{queries} que retornam poucos resultados. \\
+Desta forma, recorrem-se a \textbf{índices}, que são ficheiro auxiliares que, dada uma \textbf{chave de procura} (conjunto de atributos de uma relação), permitem obter de forma mais rápida informação sobre registos (como o seu endereço em memória ou até o(s) próprio(s) registo(s) - no caso em que a chave de procura não é uma chave primário).\\
+A forma mais rudimentar de índice consiste num ficheiro com entradas dispotas \textbf{sequencialmente} e ordenadas pela \textbf{chave de procura}. Por forma a localizar uma dada chave de procura, realiza-se procura binária sobre a tabela. Antes de discutir formas mais sofisticadas de índices, apresentam-se conceitos básicos sobre índices. De notar que as diferentes características existem ortogonalmente (i.e., todas as combinações são admissíveis, \textbf{excepto quando indicado explicitamente}).
+
+\section{Conceitos básicos}
+
+\subsection{Índices ordenados e não ordenados}
+ 
+Dependendo de como os registos a que se referem se encontram fisicamente dispostos em memória, os índices podem-se classificar como:
+\begin{itemize}
+    \item[--] \textbf{Índice ordenado/primário/\textit{clustering}}, se os registos se encontram ordenados em memória igualmente por ordem da chave do índice. Normalmente, chaves primárias como chaves de índice dão origem a índices \textit{clustering}, daí a terminologia. Por exemplo, um índice ordenado cuja chave de procura fosse o \textit{id} do instrutor (coluna da esquerda), seria um índice primário, dada a disposição dos registos em memória.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.75]{cap_indices/indice_primario.png}
+        \caption{Ficheiro com registos da relação \textit{instrutor}}
+    \end{figure}
+    \item[--] \textbf{Índice não ordenado/secundário/não \textit{clustering}}, se a chave do índice especifica uma ordem diferente da ordem sequencial do ficheiro de registos.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.75]{cap_indices/indice_secundario.png}
+        \caption{Índice secundário sobre o nome do departamento}
+    \end{figure}
+\end{itemize}
+
+Índices \textit{clustering} são geralmente \textbf{mais vantajosos} que índices não \textit{clustering}, pois, se quisermos obter vários registos com chaves de procura adjacentes, é suficiente ter um ponteiro para o primeiro registo, obtendo os registos da memória sequencialmente avançado simplesmente com esse ponteiro. Nos registos não \textit{clustering}, é possível que o próximo registo esteja num bloco de disco diferente, o que induz maior latência no acesso à memória. Quando se pretende obter \textbf{um único registo}, ambos os índices apresentam performances idênticas. \\
+
+No seguimento desta disussão, é importante referir os tipos de organização física usados pelos SGBD:
+\begin{itemize}
+    \itemsep0cm
+    \item[--]\textbf{Heaps}, no qual novos registos são colocados no primeiro espaço livro (leva a fragmentação a longo prazo);
+    \item[--]\textbf{Sorted Files}, no qual novos registos os registos são ordenados segundo o valor da sua chave primária;
+    \item[--] \textbf{Hashed Files}, no qual os fiheiros são organizados em \textit{buckets} de acordo com uma dada função de \textit{hash};
+\end{itemize}
+
+\subsection{Índices Densos/Esparsos}
+
+Os índices podem ainda ser:
+
+\begin{itemize}
+    \item[--] \textbf{Densos}, se existe uma correspondência 1:1 entre as entrada do índice e registos da tabela.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.60]{cap_indices/indice_denso.png}
+        \caption{Índice denso}
+    \end{figure}
+    \item[--] \textbf{Esparsos}, se existe uma correspondência 1:N entre uma entrada do índice e registos da tabela, i.e., só existem entradas no índice para alguns registos da tabela - este tipo de organização só é possível em \textbf{índices \textit{clustering}}. Mais especificamente, para localizar um dado registo, determina-se a entrada no índice com \textbf{a maior chave menor ou igual à chave do registo a localizar}. A partir do ponteiro obtido, faz-se um procura sequencial até ao registo pretendido.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale = 0.60]{cap_indices/indice_esparso.png}
+        \caption{Índice esparso}
+    \end{figure}
+\end{itemize}
+
+De acordo com as definições anteriores, há um \textit{tradeoff} entre espaço e tempo nas duas variantes anteriores: enquando que um índice esparso ocupa menos espaço em memória, um índice denso permite localizar mais rapidamente registos, ao evitar procura linear sobre as tabelas de registos.\\
+Contudo, atendendo a que o principal \textit{overhead} na execução de uma \textit{query} se prende com a transferência de blocos de e para disco, tem-se que, trazido um bloco para memória, o tempo para pesquisar sobre o bloco é negligenciável. Assim, se cada entrada num índice esparso apontar exatamente para o início de \textbf{bloco de índices}, tem-se \textbf{índices densos são a opção preferencial}.
+
+\subsection{Índices Multinível}
+
+Se o índice não for pequeno o suficiente para caber em memória principal, a procura de uma entrada no índice pode levar a vários acessos ao disco.\\
+Para lidar com este problema, os \textbf{índices multinível} constroem um índice exterior \textbf{esparso} sobre o índice original, agora denominado de índice interior (de notar que o índice interior está ordenado por hipótese, permitindo um índice esparso). Cada uma destas tabelas de índices ocupa normalmente \textbf{um bloco de disco}, sendo que o índice exterior é pequeno o suficiente por forma a poder ser \textbf{mantido em memória principal}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.50]{cap_indices/indice_multinivel.png}
+    \caption{Índice Multinível com 2 níveis}
+\end{figure}
+Para localizar um índice, faz-se procura binária no índice exterior para encontrar a entrada com \textbf{a maior chave menor ou igual que a chave do registo pretendido}. Daqui se obtém um ponteiro para um bloco do índice interior, que é assim varrido à procura da chave pretendida (se o índice interior for denso) ou da maior chave menor ou igual à pretendida (se o índice interior for esparso). \\
+De notar que é possível adicionar índices interiores sucessivos se a tabela do índice exterior não couber em memória, originando estruturas com mais do que dois níveis.\\
+Assim, o número de leituras de disco é no pior caso $N$, onde $N$ é o número de níveis do índice multinível - tendencialmente melhor que o limite $\lceil\log_2(b)\rceil$ que se obteria pela pesquisa binária anterior.
+
+\subsection{Índices em múltiplas chaves}
+
+Quando se pretende fazer seleção de registos com base em múltiplos atributos, pode ser conveniente possuir um índice cuja chave é composta por múltiplos atributos.\\
+Desta forma, cada chave do índice é da forma $(a_1, ..., a_n)$ e as entradas do índice encontram-se ordenadas por \textbf{ordem lexicográfica} das suas chaves, i.e., $(a_1, b_1) < (a_2, b_2)$ se e só se $a_1 < a_2$ ou $a_1 = a_2$ e $b_1 < b_2$.
+
+\section{Manutenção de índices}
+
+Apesar da aceleração que proporciona, a utilização de índices acarreta custos de manutenação, pois há que manter uma estrutura de índices coerente perante a inserção, remoção e atualização de registos nas tabelas. Como a atualização pode ser vista como um remoção seguida da inserção de um registo diferente do inicial, apenas se abordam os primeiros dois casos.
+
+\subsubsection{Inserção}
+
+No caso de \textbf{índices densos}, insere-se uma entrada no índice com a nova chave.
+Se o índice for \textbf{esparso} e se a novo registo obriga a criação de um novo bloco em disco, então insere-se uma entrada no índice com a nova chave.
+
+\subsubsection{Remoção}
+
+No caso de \textbf{índices densos}, remove-se a entrada no índice correspondente à chave do registo a apagar.
+Se o índice for \textbf{esparso}, há que ter em conta dois casos:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] se a entrada a apagar era a única com a sua chave de procura, então a substitui-se a chave da entrada do índice pela próxima chave; só se apaga a entrada se a próxima chave já possuir uma entrada.
+    \item[--] se a entrada no índice correspondente apontar exatamente para o registo a apagar, então essa entrada é atualizar por forma a  apontar para o próximo registo com a mesma chave de procura.
+\end{itemize}
+
+\section{Tipos de índices}
+
+Para além da organização sequencial inicialmente apresentada, existem os seguintes tipos de índices, que apresentam diversas vantagens sobre esta:
+
+\subsection{Índices $B^{+}-tree$}
+
+Uma $B^{+}-tree$ consiste numa árvora balanceada (i.e., qualquer caminho da raíz até uma folha tem o mesmo comprimento) composta por nós com $\lceil\frac{n}{2}\rceil$ a $n$ filhos, onde $n$ é um parâmetro fixo da árvore (se o nó for uma folha, substitui-se $n$ por $n - 1$ nas condições anteriores). \\
+Cada nó de uma $B^{+}-tree$ contém $m - 1$ chaves de procura $K_1, K_2, ..., K_{m - 1}$ e $m$ ponteiros $P_1, P_2, ..., P_{m}$, onde $m \le n$ e as chaves se encontram por \textbf{ordem crescente}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.50]{cap_indices/no_btree.png}
+    \caption{Nó de uma $B^{+}-tree$}
+\end{figure}
+
+Nos \textbf{nós folha}, cada ponteiro $P_i$ ($i < m$) aponta para um registo em memória, enquanto o ponteiro $P_m$ aponta para o próximo nó folha, por forma a facilitar varrimentos sequenciais de registos sem ter que percorrer a árvore toda a partir do topo.\\
+Nos \textbf{nós interiores}, se possuirem $m - 1$ chaves de índice, cada ponteiro $P_i$ ($i \le m$) aponta para outro nó que é raíz de uma subárvore com chaves de procura \textbf{menores} que $K_i$ e \textbf{maiores ou iguais} que $K_{i - 1}$. Notar que o primeiro ponteiro, $P_1$ aponta para uma subárvore com registos com chaves menores que $K_1$, e o último ponteiro, $P_{m}$, aponta para registos com chaves maiores ou iguais que $K_{m - 1}$.\\
+Se $i > m$ então o ponteiro aponta para \textbf{NULL}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 1]{cap_indices/btree.png}
+    \caption{Exemplo de uma $B^{+}-tree$}
+\end{figure}
+
+Dado que, para uma tabela com $N$ registos, a altura de uma árvore é $O(\log_{\lceil\frac{n}{2}\rceil}(N))$, \textit{queries} de seleção com base em igualdade são muito eficientes quando há índices $B^{+}-tree$: basta percorrer uma árvore com altura logarítmica em $n$ desde a raíz até ao nó folha pretendido. \\
+Ademais, \textbf{\textit{range queries}} (i.e., procura de valores com chave num intervalo $[\min, \max])$ também são eficientes: basta percorrer a árvore à procura da entrada com chave $\min$ e fazer um varrimento sequencial usando os últimos ponteiros de cada nó folha até à última chave com valor $\max$. \\
+Contudo, dada a restrição no número de chaves em cada nó, operações de inserção e remoção induzem um \textit{overhead} adicional, fazendo com que sejam também $O(\log_{\lceil\frac{n}{2}\rceil}(N))$.
+%(\textbf{Não avaliado}) A inserção de um registo pode fazer com que cada nó possua mais que $n$ ponteiros; nesse caso, há que criar novos nós, criando novos ponteiros no nível acima, que podem novamente ficar cheios, etc... . Analogamente, a remoção pode fazer com ue cada nó possua menos que $\lceil\frac{n}{2}\rceil$ ponteiros; nesse caso ou se transferem todos os ponteiros para o nó à esquerda, se tiver capacidade, ou se transferem ponteiros do nó da esquerda por forma a que o número de ponteiros do nó prefaça de novo $\lceil\frac{n}{2}\rceil$; se o nó a apagar tiver a primeira chave de um nó, pode ser necessário apagar essa chave em todos os nós no caminho até à raíz.
+
+
+\subsection{Índices \textit{Hash}}
+
+Num índice \textit{Hash}, as entradas do índice estão organizadas em \textit{buckets}, que na prática corresponde a uma lista ligada de registos (quando o índice está em memória principal), ou lista ligada de blocos (quando está em disco). Dado um registo com chave $K_i$, o endereço do \textit{bucket} no qual esse registo vai ser inserido obtém-se por aplicação de uma função de \textit{hash}, $h(K_i)$. Por norma, a resolução de colisões faz-se por encadeamento externo, ou, no contexto de índices, \textbf{\textit{overflow chaining}}.\\
+Índices \textit{Hash} são particularmente úteis em \textit{queries} de igualdade, não sendo no entando apropriadas para \textit{queries} de \textit{range}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.60]{cap_indices/hash_index.png}
+    \caption{Exemplo de um índice \textit{Hash}}
+\end{figure}
+
+Um dos principais problemas associadas a este tipo de índices consiste no \textit{bucket overflow}: quando o número de \textit{buckets} não é suficiente para o número de registos da tabela ou quando certos \textit{buckets} recebem muito mais registos que outros, há que encadear vários \textit{buckets} que na verdade estão associados à mesma chave de dispersão, resultando em piorias na procura de registos. \\
+Por forma a contrariar este problema, em vez de se fazer \textit{hashing} estático (i.e., número de \textit{buckets} é fixo), pode-se fazer  \textit{hashing} dinâmico, adaptando-se de forma incremental o número de \textit{buckets} ao número de registos que existem na tabela em cada momento.
+
+\subsection{Índices \textit{Bitmap}}
+
+Um \textbf{índice \textit{bitmap}} num atributo $A$ de uma relação $r$ consiste num \textit{bitmap} para cada valor que $A$ pode tomar. Assim, se $A$ tomar valores em $(v_1, ..., v_n)$, existem $n$ bitmaps $b_i = (b_{i1}, ..., b_{iN})$, onde $N$ é o número total de registos na tabela. O significado destes \textit{bitmaps} é o seguinte: se $b_{ij} = 1$, então o registo número $j$ tem o atributo $A$ com valor $v_i$. \begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.60]{cap_indices/indice_bitmap.png}
+    \caption{Exemplo de um índice \textit{Bitmap}}
+\end{figure}
+
+Os índices \textit{bitmap} revelam-se vantajosos quando as tabelas não são muito grandes e há necessidade de fazer seleções complexas com base em certos atributos. Por exemplo, se se quer determinar os registos com género masculino e com nível de rendimento $L2$ ou $L3$, basta aplicar a expressão lógica aos bitmaps correspondentes. No bitmap resultante, se entrada $i$ está a 1, então o registo $1$ satisfaz a \textit{query}, sendo trivial a partir daí saber \textit{exatamente} quais os blocos a aceder sem ter que fazer uma procura sequencial (notar que isto só é vantajoso em \textit{queries} bastante seletivas, como se vai ver mais à frente).
+\pagebreak
+
+
+\section{Índices em SQL}
+
+Embora o SQL-92 não defina sintaxe para criação de índices, esta operação é suportada pelos SGBD's atuais:
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE INDEX index_name ON table_name [Type] (column list)
+\end{lstlisting}
+
+Onde \textit{Type} corresponde aos tipos de índice anteriores (notar que não é possível fazer um índice \textit{Hash} em mais do que um coluna). A não especificação de \textit{Type} leva a uma escolha \textit{default}. \\
+Por omissão, criam-se índices sobre \textit{primary keys}, dada a necessidade de impor a verificação da restrição da chave primária de forma eficiente. Embora nem sempre se criem índices sobre \textit{foreign keys}, é boa prática fazê-lo, especialmente na presença das cláusulas \textit{ON DELETE CASCADE} ou \textit{ON UPDATE CASCADE}.
+
+\subsection{Seletividade de uma \textit{query}}
+
+Antes de expor em que casos é que é vantajoso e útil criar índices, vamos introduzir o conceito de \textbf{seletividade}.\\
+Pela discussão anterior, um índice é tão mais útil quanto mais diminuir a necessidade de trazer blocos para memória. Dada uma \textit{query}, a sua \textbf{seletividade} está relacionada com a proporção de registos que serão incluídos na resposta (i.e., uma query é \textbf{tão mais seletiva} quanto menos registos fizerem parte da resposta). Seja $s$ essa proporção (i.e., seletividade de $1 - s$), e seja $n$ o \textbf{número de registos que cabem num bloco de disco}. Tem-se:
+
+\begin{itemize}
+    \itemsep0cm
+    \item[--] A probabilidade de um dado registo não ser incluído na resposta à query é $1 - s$;
+    \item[--] A probabilidade de um bloco não possuir qualquer registo que vai ser incluído na resposta à query é $(1-s)^n$ (assumindo uma distrbuição uniforme dos registos com respostas pelos blocos);
+    \item[--] A probabilidade de um bloco possuir pelo menos um registo que vai ser incluído na resposta à query (sendo por isso trazido para memória) é $1 - (1-s)^n$.
+\end{itemize}
+Atendendo à última expressão, tem-se que um índice serão tão mais útil quando menos registos houver por bloco e quão mais seletiva for a query (i.e., menor $s$).
+
+\subsection{\textit{Queries} que dispensam o uso de índices}
+
+\textit{Queries} que não fazem qualquer tipo de \textit{join}, agrupamento, \textit{sorting} ou filtragem dispensam o uso de índices. Exemplo:
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+SELECT vcName,ntAge FROM tblEmployee1 
+    UNION ALL
+SELECT vcName,ntAge FROM tblEmployee2
+\end{lstlisting}
+
+Também dispensam o uso de índices \textbf{adicionais} \textit{queries} que fazem filtragens/\textit{joins} sobre as chaves primárias de relações (pois já existem índices para estas).
+
+\subsection{\textit{Queries} onde é conveniente usar índices}
+
+Quando há necessidade de remoção de duplicados, há necessidade de ordenar registos, sendo por isso útil criar um índice $B^{+}-tree$ sobre os atributos (no caso seguinte, sobre (\textit{vcName}, \textit{ntAge})).
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+SELECT vcName,ntAge FROM tblEmployee1 
+    UNION
+SELECT vcName,ntAge FROM tblEmployee2
+\end{lstlisting}
+
+Quando há seleções com base em igualdade, deve se criar um índice \textit{Hash} sobre o atributo; se houver seleções com base em comparação, esse índice deve ser $B^{+}-tree$. Quando existem vários comparações, como heurística, devem ser postos em primeiro lugar no índice os atributos referentes às condições de igualdade (que é uma operação tendencialmente mais seletiva que a comparações de desigualdade). 
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+SELECT * FROM tblEmployee WHERE b=5 AND c>10 AND d=15 AND e<=20
+\end{lstlisting}
+
+Assim, no exemplo acima, qualquer um dos índices é aceitável:
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+CREATE INDEX idx ON tblEmployee(b,d,c)
+CREATE INDEX idx ON tblEmployee(b,d,e)
+CREATE INDEX idx ON tblEmployee(d,b,c)
+CREATE INDEX idx ON tblEmployee(d,b,e)
+\end{lstlisting}
+
+De qualquer forma, é útil realizar uma \textbf{análise prévia da seletividade}, contando, para cada atributo, o número de valores diferentes.\\
+
+\textbf{Nota Importante}: Apenas é possível criar um índice por tabela! \\
+
+Também em condições sem prefixo é útil criar índices, pois há na verdade uma comparação alfabética:
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+SELECT vcName,ntAge FROM tblEmployee WHERE vcName LIKE 'Greg%'
+\end{lstlisting}
+
+\subsection{\textit{Index-Only Plans}}
+
+Se as \textit{queries} referenciarem atributos que são partes de índices, é possível que a query seja respondida apenas com informação presente em índices. Por exemplo, um índice sobre $E(dno, sal)$, permite responder à seguinte \textit{query}:
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+SELECT E.dno, MIN(E.sal) FROM Emp E
+GROUP BY E.dno
+\end{lstlisting}
+
+\section{Otimização e Processamento de \textit{queries}}
+
+Relembremos as etapas do processamento de uma \textit{query}:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{cap1/arquitetura.png}
+    \caption{Processamento de uma \textit{query}}
+\end{figure}
+
+Por forma a avaliar uma \textit{query}, não é suficiente convertê-la numa expressão de álgebra relacional. É necessário também anotá-la com instruções que especifiquem exatamente como avaliar cada instrução, formando assim um \textbf{plano de execução}, que pode ser dado como input ao motor de execução da \textit{query}.\\
+O plano de execução é tendencialmente um plano \textbf{ótimo}. Por forma a estimar o custo de cada operação, o SGBD mantém estatísticas sobre cada relação, nomeadamente:
+
+\begin{itemize}
+    \itemsep0cm
+    \item[--] $n_r$, o número de tuplos da relação $r$;
+    \item[--] $b_r$, o número de bloco que contêm tuplos da relação $r$;
+    \item[--] $l_r$, o tamanho de cada tuplo da relação $r$;
+    \item[--] $f_r$, o número de tuplos da relação $r$ que cabem num bloco;
+    \item[--] $V(A, r)$, o número de valores distintos que aparecem na relação $r$ no atributo $A$;
+\end{itemize}
+
+Considera-se ainda o seguinte \textbf{modelo de custo}: dado um custo de transferência de um bloco de $T_t$ segundos, um custo de acesso ao bloco de $T_s$ segundos, uma operação que transfira $b$ blocos e que execute $S$ acessos aleatórios (i.e., não sequenciais), terá um custo de 
+\[
+    b \cdot t_T + S \cdot t_S
+\]
+
+Vamos agora olhar para os diferentes tipos de operação à luz deste modelo de custo.
+
+\subsection{Seleções}
+
+\subsubsection*{Seleções sem índice}
+
+Na ausência de índice, assumindo contiguidade dos blocos em memória, há que contabilizar o tempo de acesso ao bloco, mais um tempo de transferência por cada bloco trazido para memória. No caso da igualdade na chave, pode-se terminar a pesquisa quando o(s) registo(s) pretendidos são encontrados, o que acontece em média a meio de cada bloco.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+       Algoritmo                              & Custo  \\ \hline
+      Pesquisa Linear                        &   $t_S + b_r \cdot t_T$     \\ \hline
+     Pesquisa Linear com igualdade na chave &     $t_S + (\frac{b_r}{2}) \cdot t_T$ (caso médio)  \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsubsection*{Seleções com índice}
+
+Estas operações também são frequentemente denominadas de \textit{index scans}. \\
+Seja $h_i$ a altura da árvore $B^{+}-tree$ e $n$ o número de registos trazidos para memória. Nos casos abaixo, a igualdade numa chave/não-chave determina se é necessário analisar os blocos apontado por cada entrada no índice. Índices não \textit{clustering} fazem com que o acesso a cada bloco acarrete um custo de $t_T$ adicionais (pois os registos podem se encontrar espalhados na memória). A comparação é semelhante à igualdade numa não-chave, pois como se viu anteriormente, há a possibilidade de percorrer os nós folha, que apontam para blocos diferentes.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+       Algoritmo                              & Custo  \\ \hline
+      Index \textit{clustering}, índice $B^{+}-tree$, igualdade na chave                        &  $(h_i + 1) \cdot (t_T + t_S)$     \\ \hline
+      Index \textit{clustering}, índice $B^{+}-tree$, igualdade numa não-chave                        &  $h_i \cdot (t_T + t_S) + t_S + b \cdot t_T$  \\ \hline
+      Index \textit{não clustering}, índice $B^{+}-tree$, igualdade na chave                        &  $(h_i + 1) \cdot (t_T + t_S)$     \\ \hline
+      Index não \textit{clustering}, índice $B^{+}-tree$, igualdade numa não-chave                        &   $(h_i + n) \cdot (t_T + t_S)$  \\ \hline
+      Index \textit{clustering}, índice $B^{+}-tree$, comparação                        &  $(h_i + 1) \cdot (t_T + t_S)$     \\ \hline
+      Index não \textit{clustering}, índice $B^{+}-tree$, comparação                        &    $h_i \cdot (t_T + t_S) + t_S + b \cdot t_T$  \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Ordenação}
+
+Dada a quantidade de registos a ordenar, raramente a operação de ordenação se realizar totalmente em memória.\\
+Dada uma memória na qual cabem $M$ blocos, o \textbf{External Sorting} divide os $b_r$ blocos com registos em $N$ \textit{runs} (etapas) com $\lceil\frac{b_r}{M}\rceil$ blocos, ordenando-as individualmente.\\
+De seguida, ocorre um \textbf{merge} das $N$ vias (o \textit{mergesort} como o conhecemos fá-lo em 2 vias), diminuindo o número de \textit{runs} em $M - 1$ em cada \textit{pass}.
+%(curiosidade: para tal, escolhe-se $b_b$ blocos de cada \textit{run}, fazendo-se merge de $\lfloor\frac{M}{b_r}\rfloor - 1$ runs de cada vez).
+\vspace{-1em}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.35]{cap_indices/external_sort.png}
+    \caption{\textit{External Sort}}
+\end{figure}
+
+Com certas otimizações, é possível provar que o número de acessos a blocos num \textit{External Sort} é:
+\[
+    b_r(2 \log_{\lfloor\frac{M}{b_r}\rfloor - 1}(b_r / M) + 1)
+\]
+
+e o número de acessos aleatórios em disco é (sabendo, por otimização, se trazem $b_b$ de cada run para se fazer merge, em vez de um só bloco):
+
+\[
+    2 \lceil b_r /M\rceil + \lceil b_r / b_b \rceil(2 \log_{\lfloor\frac{M}{b_r}\rfloor - 1}(b_r / M) - 1)
+\]
+
+\subsection{\textit{Joins}}
+
+\subsubsection*{\textit{Nested-Loop Join}}
+
+Dadas relações $r$ e $s$ com $n_r$ e $n_s$ tuplos, este tipo de join apresenta $n_r \cdot b_s + b_r$ acessos a blocos e $n_r + n_s$ acessos aleatórios, sendo a forma mais primitiva de se fazer \textit{join}.
+
+\begin{algorithm}
+    \caption{\textit{Nested-Loop Join}}\label{alg:cap}
+    \begin{algorithmic}
+    \ForEach {tuple $t_r$ in $r$}
+        \ForEach {tuple $t_s$ in $s$}
+        \State test pair $(t_r , t_s)$ to see if they satisfy the join condition $\theta$
+        \State if they do, add $tr \cdot ts$ to the result;
+        \EndFor
+    \EndFor
+    \end{algorithmic}
+ \end{algorithm}
+
+\subsubsection*{\textit{Block Nested-Loop Join}}
+
+Por forma a diminuir a frequência dos acessso aleatórios a disco, este tipo de \textit{join} procede-se bloco a bloco (anteriormente, testava-se um tuplo de $r$ contra \textit{todos} os blocos de $s$). Este tipo de join apresenta $b_r \cdot b_s + b_r$ acessos a blocos e $b_r + b_s$ acessos aleatórios, o que representa uma melhoria significativa em relação ao caso anterior.
+
+\begin{algorithm}
+    \caption{\textit{Block Nested-Loop Join}}\label{alg:cap}
+    \begin{algorithmic}
+    \ForEach {block $B_r$ of $r$}
+        \ForEach {block $B_s$ of $s$}
+            \ForEach {tuple $t_r$ in $B_r$}
+                \ForEach {tuple $t_s$ in $B_s$}
+                    \State test pair $(t_r , t_s)$ to see if they satisfy the join condition $\theta$
+                    \State if they do, add $tr \cdot ts$ to the result;
+                \EndFor
+            \EndFor
+        \EndFor
+    \EndFor
+    \end{algorithmic}
+ \end{algorithm}
+
+\subsubsection*{\textit{Hash Join}}
+
+Dada uma função de \textit{h} que mapeia atributos sobre os quais se faz \textit{join} para $\{0, 1, ..., n_h \}$.\\
+Sejam $\{r_0, r_1, ..., r_{n_h}\}$ as partições dos tuplos de $r$ tais que cada tuplo $t_r$ de $r$ é colocado em $r_i$ se:
+\[
+    i = h(t_r([\text{Atributos de Join}]))
+    \]
+sendo as partições $\{s_0, s_1, ..., s_{n_h}\}$ são definidas analogamente. \\
+O funcionamento do \textit{Hash Join} baseia-se na seguinte observação: se $t_r$ e $t_s$ satisfazem a condição de \textit{join}, então são ambos \textit{hashed} para o mesmo valor $i$. Desta forma, só é necessário comparar tuplos de $r$ em $r_i$ com tuplos de $s$ em $s_i$. \\
+Por questões de otimização, para cada $i$, constroi-se uma tabela $Hash$ com os tuplos de $s_i$ com uma função de \textit{hash} diferente da anterior. O obietivo é evitar que todos os registos dentro de um mesmo balde $i$ sejam tidos em conta para fazer \textit{join} com um registo de $r$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.50]{cap_indices/hash_join.png}
+    \caption{\textit{Hash Join}}
+\end{figure}
+
+\subsection{Otimização de \textit{Queries} baseadas em heurísticas}
+
+Por vezes, o número de planos gerados para cada \textit{query} é demasiado grande, originando a um esforço computacional que é agravado pelo cálculo dos custos de cada operação.\\
+Desta forma, dadas de associatividade, comutatividade e distribuição da álgebra relacional que não são aqui referidas, procede-se simplesmente à simplificação da expressão algébrica por forma a que \textbf{operações de seleção e de projeção ocorram o mais cedo possível na computação}. \\
+O \textit{rational} desta decisão prende-se com a diminuição da quantidade de informação a processar o mais cedo possível, descartando colunas e registos das tabelas que não serão usados. (Note-se que nem sempre isso ocorre: se existir um seleção depois de um join e houver um índice sobre atributos do join, pode ser prejudicial adiantar a operação de seleção).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.8]{cap_indices/otimizacao_expr.png}
+    \caption{Otimização da expressão algébrica por heurísticas}
+\end{figure}
+\vspace{-0.5em}
+\subsection{Análise de planos de execução no Postgres}
+
+Através do comando:
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF, EXPLAIN, ANALYSE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+EXPLAIN ANALYSE 
+[query]
+\end{lstlisting}
+
+é possível obter uma \textbf{árvore correspondente ao plano de execução}. Se for pretendido obter \textbf{dados reais} relativos à execução da \textit{query}, pode-se envolter o comando numa transação:
+
+\begin{lstlisting}[language=SQL, morekeywords={CALL, DECLARE, PROCEDURE, IF, EXPLAIN, ANALYSE}, framesep=8pt, xleftmargin=40pt, framexleftmargin=40pt, frame=tb, framerule=0pt]
+BEGIN TRANSACTION
+EXPLAIN ANALYSE 
+[query]
+ROLLBACK
+\end{lstlisting}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.6]{cap_indices/explain.png}
+    \caption{Resultado do comando \textit{EXPLAIN ANALYSE}}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale = 0.5]{cap_indices/arvore_explain.png}
+    \caption{Árvore de execução correspondente}
+\end{figure}
+
+O termo \textit{cost} diz respeito ao custo estimado da operação, sendo \textit{actual time} o custo real; \textit{width} diz respeito ao tamanho de cada tuplo, \textit{rows} ao número de registos analisados e \textit{loops} o número de vezes em que se iterou sobre um dado conjunto de registos. Descreve-se agora o significado de alguns dos procedimentos que se podem obter:
+
+\begin{itemize}
+    \itemsep0cm
+    \item[--] \textbf{SeqScan}: um varrimento sequencial da tabela;
+    \item[--] \textbf{IndexScan}: varrer o índice, ir de seguida à memória.
+    \item[--] \textbf{IndexOnlyScan}: varrer unicamente o índice (acontece em \textit{queries} que manipulam/acedem a atributos de um dado índice);
+    \item[--] \textbf{Bitmap Scan}: varrer o índice e construir um \textit{bitmap} dos registos que obedecem ao critério de filtragem.
+    \item[--] \textbf{NestLoop/HashJoin}: falados anteriormente;
+    \item[--] \textbf{Merge Join}: tipo de merge que se faz em tempo linear quando ambos os conjuntos de tuplos estão ordenados;
+    \item[--] \textbf{Lateral Join}: \textit{Join} contra \textit{table expressions};
+    \item[--] \textbf{Semi Join}: para \textit{outer joins};
+    \item[--] \textbf{Anti Join}: \textit{joins} exclusivos (e.g., NOT IN...);
+    \item[--] \textbf{GroupAggregarte}: agregação normal;
+    \item[--] \textbf{HashAggregarte}: agregação em memória baseada em funções de \textit{hash};
+    \item[--] \textbf{CTEScan}: junção de uma CTE à \textit{query} principal;
+    \item[--] \textbf{SubqueryScan}: idem, mas para \textit{subqueries};
+    \item[--] \textbf{Materialize}: criar um conjunto de registos em memória a partir de uma \textit{query};
+    \item[--] \textbf{Append}: usado na junção de conjuntos de registos.
+\end{itemize}
+
+\textit{Nota: a existência de SeqScan's pode evidenciar a necessidade de um índice.}\\
+
+\textit{Nota: uma discrepância entre valores previstos/reais pode ser resolvida através do comando VACUUM ANALYSE, que força o recalculo das estatísticas do SGBD.}
 
 
 
@@ -2029,11 +2881,11 @@ Existem 2 questões a resolver nas transações:
 Existem, como tal, 3 caminhos possíveis para a conclusão de uma transação:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap4/caminhos_transacoes.png}
+    \includegraphics[scale = 0.4]{cap_transct/caminhos_transacoes.png}
     \caption{3 caminhos possíveis de uma transação}
 \end{figure}
 
-As transações tem 4 grandes propriedades (\textbf{ACID}):
+As transações possuem 4 grandes propriedades (\textbf{ACID}):
 \begin{itemize}
     \itemsep0cm
     \item[--] \textbf{Atomicidade}: numa transação, as alterações ao estado são \textbf{atómicas}: ou todas se realizam ou nenhuma se realiza - a função do sistema é manter informação sobre as alterações efetuadas por cada transação ativa e, em caso de \textit{crash} ou \textit{abort} explícito, desfazer as alterações feitas desde o início da transação até ao ponto de rutura.
@@ -2045,7 +2897,7 @@ As transações tem 4 grandes propriedades (\textbf{ACID}):
 Podemos esquematizar uma transação com o seguinte diagrama de estados:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap4/diagrama_estados_trans.png}
+    \includegraphics[scale = 0.4]{cap_transct/diagrama_estados_trans.png}
     \caption{Diagrama de estados de uma transação}
 \end{figure}
 
@@ -2125,8 +2977,189 @@ Definimos ainda sobre os níveis de isolamento em SQL:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale = 0.4]{cap4/isolamento_transacoes.png}
+    \includegraphics[scale = 0.4]{cap_transct/isolamento_transacoes.png}
     \caption{Consistência e Isolamento em SQL}
 \end{figure}
 
+\section{Concorrência}
+Logo no 1º capítulo vimos que um SGBD contém um módulo \textit{Concurrency Manager}, que por sua vez garante \textbf{C}oerência e \textbf{I}solamento das transações.
+
+\subsection{Isolamento de Transação e Serialização}
+A execução de transações concorrentes \textbf{em série} é ineficiente, pelo que se permite que várias transações corram simultaneamente no sistema. Isto traz algumas \textbf{vantagens}:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] \textbf{Maior utilização do disco e processadores} - aumento do \textit{throughput};
+    \item[--] \textbf{Redução do tempo médio de resposta} das transações.
+\end{itemize}
+
+\begin{definition}[Escalonamento/\textit{Schedule}]
+    Sequência de instruções que especificam a ordem cronológica na qual as instruções de transações concorrentes são executadas.
+    \begin{itemize}
+        \itemsep 0cm
+        \item[--] Um escalonamento de um conjunto de transações inclui todas as instruções de todas as transações.
+        \item[--] \textbf{Tem de preservar a ordem} na qual as instroções aparecem em cada transação individual.
+    \end{itemize}
+\end{definition}
+
+Um escalonamento diz-se \textbf{serial} se na sequência de instruções das várias transações, as instruções relativas a uma única transação aparecem seguidas.
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Escalonamentos em Série]{{\includegraphics[width=8.1cm]{cap_transct/schedule_serial.png} }}%
+    \qquad
+    \subfloat[\centering Escalonamentos Equivalentes]{{\includegraphics[width=8.1cm]{cap_transct/schedule_eqvlnt.png} }}%
+    \caption{Escalonamento de Transações}%
+    \label{fig:example}%
+\end{figure}
+
+Se repararmos nos escalonamentos equivalentes, notamos que o escalonamento não precisa ser serial para produzir o resultado correto, mas tem de ser \textbf{equivalente} a um escalonamento serial para o considerarmos \textbf{serializável}.
+
+Para os escalonamentos introduzimos uma \textbf{visão simplificada} das transações, considerando apenas as instruções de leitura e escrita na análise destas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.35]{cap_transct/visao_simplificada.png}
+    \caption{Visão simplificada de uma Transação}
+\end{figure}
+
+Consideremos agora um escalonamento \textit{S}, no qual existem 2 instruções consecutivas, $I$ e $J$, das transações $T_i$ e $T_j$ respetivamente ($i \neq j$). Se $I$ e $J$ se referirem a objetos diferentes, então podemos trocar $I$ e $J$ sem afetar os resultados de qualquer instrução do escalonamento. Contudo, se se refirem ao mesmo objeto Q, então a ordem destes passos é relevante. Dada a \textbf{visão simplificada} das transações, só consideramos as instruções de leitura e escrita e temos os seguintes 4 casos:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] $I$: \textbf{read}(Q), $J$: \textbf{read}(Q) - a ordem de $I$ e $J$ é irrelevante, visto que o mesmo valor de Q vai ser lido por $T_i$ e $T_j$, independentemente da ordem;
+    \item[--] $I$: \textbf{read}(Q), $J$: \textbf{write}(Q) - se $I$ vem antes de $J$, então $T_i$ não lê o valor de Q que está a ser escrito por $T_j$ na instrução J. Se J vier antes de I, então $T_i$ lê o valor a ser escirot. Logo, a ordem é relevante.
+    \item[--] $I$: \textbf{write}(Q), $J$: \textbf{read}(Q) - análogo ao caso anterior.
+    \item[--] $I$: \textbf{write}(Q), $J$: \textbf{write}(Q) - visto que ambas as instruções são de escrita, a ordem não afeta nenhuma das transações $T_i$ e $T_j$. Contudo, o valor a ser obtido na próxima instrução de \textbf{read(Q)} de S é afteada, visto que o resultado de apenas 1 das escritas é preservado na base de dados. Assim, a ordem é também relevante.
+\end{itemize}
+
+Dizemos então que $I$ e $J$ têm um \textbf{conflito} se são operações de \textbf{transações diferentes} que acedem ao mesmo objeto, e pelo menos 1 dessas instruções é uma \textbf{escrita}.
+
+Se $I$ e $J$ são instruções de transações diferentes e não têm conflito entre si, então podemos trocar a ordem para criar um novo escalonamento \textbf{S'}, que é equivalente a \textbf{S}, visto que todas as instruções estão na mesma ordem exceto para $I$ e $J$, cuja ordem é irrelevante - se um escalonamento \textbf{S} pode ser transformado noutro escalonamento \textbf{S'} por uma série de trocas de instruções não-conflituosas, diz-se que \textbf{S} e \textbf{S'} são \textbf{equivalentes sem conflitos}.
+Dizemos também que um escalonamento \textbf{S} tem \textbf{conflitos serializáveis} se é equivalente a um escalonamento serial.
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Escalonamento com Conflito Serializável]{{\includegraphics[width=4.1cm]{cap_transct/sch_confl_ser.png} }}%
+    \qquad
+    \subfloat[\centering Escalonamento com Conflito Não Serializável]{{\includegraphics[width=8.1cm]{cap_transct/sch_non_confl_ser.png} }}%
+    \caption{Escalonamento com Conflitos}%
+    \label{fig:example}%
+\end{figure}
+De notar que a figura em (b) tem um conflito não serializável, pois se tivéssemos $<T_3 , T_4>$, o próximo \textbf{read}(Q) iria ler o resultado da transação $T_4$, e se tivermos $<T_4 , T_3>$ a transação $T_3$ irá ler o valor da escrita em $T_4$.
+
+Uma maneira simples e eficiente de determinar conflitos de serialização num escalonamento é construir um \textbf{grafo de precedência} a partir de um escalonamento \textbf{S}. O grafo consiste num par $G = (V, E)$, onde $V$ é um conjunto de vértices e $E$ um conjunto de arestas. O conjunto de \textbf{vértices} $V$ é dado por todas as transações $T_i$ que participam no escalonamento. O conjunto de \textbf{arestas} consiste em todas as arestas $T_i \rightarrow T_j$ no qual 1 das 3 condições se verificam:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] $T_i$ executa \textbf{write}(Q) antes de $T_j$ executar \textbf{read}(Q);
+    \item[--] $T_i$ executa \textbf{read}(Q) antes de $T_j$ executar \textbf{write}(Q);
+    \item[--] $T_i$ executa \textbf{write}(Q) antes de $T_j$ executar \textbf{write}(Q);
+\end{itemize}
+
+Se uma aresta $T_i \rightarrow T_j$ existe no grafo de precedência, então em qualquer escalonamento serial \textbf{S'} equivalente a \textbf{S}, $T_i$ tem de aparecer \textbf{antes} de $T_j$.
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Escalonamento Serializável]{{\includegraphics[width=7cm]{cap_transct/grafo_prec_1.png} }}%
+    \qquad
+    \subfloat[\centering Escalonamento Não Serializável]{{\includegraphics[width=7cm]{cap_transct/grafo_prec_2.png} }}%
+    \caption{Escalonamento Serializável}%
+    \label{fig:example}%
+\end{figure}
+
+Um escalonamento é \textbf{serializável} se o seu grafo de precedências não tiver ciclos - se o grafo for acíciclo, podemos obter uma \textbf{ordenação topológica} e executar as transações sobre uma qualquer. De notar que isto é uma condição \textbf{suficiente}, mas não \textbf{necessária}, pois existem casos de escalonamentos serializáveis cujo grafo de precedência contém um ciclo.
+
+\subsection{Isolamento e Atomicidade de uma Transação}
+Até agora vimos escalonamentos que assumem que não existem falhas nas transações.
+
+Se uma transação $T_i$ falha, precisamos reverter os seus efeitos, e os efeitos de qualquer transação $T_j$ que esteja a ser executada concorrentemente com $T_i$ e que dependa desta.
+
+Um \textbf{escalonamento parcial} define-se por \textbf{não ter} as operações de \textbf{commit} ou \textbf{abort} em todas as transações que este abrange, como é o caso do escalonamento abaixo.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.3]{cap_transct/irrecuperavel_esc.png}
+    \caption{Escalonamento não recuperável}
+\end{figure}
+Como $T_7$ confirma a transação logo a seguir a ler A, i.e., ainda quando $T_6$ está ativa. Se $T_6$ falhar antes de confirmar, terá de reverter todas as suas instruções e $T_7$ já confirmou uma transação de um valor que fora revertido - $T_7$ é \textbf{dependente} de $T_6$, pelo que devemos abortar também $T_7$ por questões de atomicidade. Como tal, diz-se que este escalonamento é \textbf{não-recuperável}.
+
+\begin{definition}[Escalonamento Recuperável]
+    Um escalonamento diz-se recuperável sse para cada par de transações $T_i$ e $T_j$, tal que $T_j$ lê dados escritos previamente por $T_i$, então a confirmação de $T_i$ tem de aparecer antes da confirmação de $T_j$.
+\end{definition}
+
+Para o exemplo acima ser recuperável, $T_7$ teria de esperar até $T_6$ confirmar para poder confirmar a sua própria transação.
+
+Isto pode criar o efeito de \textbf{rollbacks em cadeia}, como é o seguinte caso:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.3]{cap_transct/cadeia_rollback.png}
+    \caption{Rollbacks em cadeia}
+\end{figure}
+
+Uma pequena extensão que se fazem às transações são \textbf{savepoints} - são usados dentro das transações como "pontos seguros" das aplicações cujo estado é conhecido e a partir dos quais a computação pode recomeçar. Os \textbf{rollbacks} podem ser para \textbf{savepoints}.
+
+\subsection{Protocolo de Isolamento com Trincos}
+Uma maneira de assegurar isolamento é requisitar que objetos de dados sejam acedidos por exclusão mútua, i.e, se uma transação acede um objeto, nenhuma outra transação pode modificar esse mesmo - para isso usamos \textbf{trincos}.
+
+Existem 2 modos de trincos sobre objetos:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] \textbf{Partilhado}. Se uma transação $T_i$ obteve um \textbf{trinco partilhado} (seja este \textbf{S}) no objeto Q, então $T_i$ pode ler, mas não pode escrever em Q.
+    \item[--] \textbf{Exclusivo}. Se uma transação $T_i$ obteve um \textbf{trinco exclusivo} (seja este \textbf{X}) no objeto Q, então $T_i$ pode ler e escrever em Q.
+\end{itemize}
+A transação \textbf{pede} o modo de trinco apropriado de acordo o tipo de operações que vai executar sobre o objeto Q - o pedido é feito ao \textit{Concurrency Control Manager} do SGBD, e bloqueia até lhe ser concedido (fica em \textit{wait-state}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{cap_transct/matriz_compatibilidade.png}
+    \caption{Matriz de Compatibilidade dos Modos de Trinco}
+\end{figure}
+
+De forma simples, o protocolo de acesso a objetos nas transações concorrentes é dado por:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] Uma transação tem que adquirir um trinco \textbf{partilhado} antes de tentar ler o valor de um tuplo.
+    \item[--] Uma transação tem que adquiri um trinco \textbf{exclusivo} antes de tentar escrever o valor de um tuplo.
+    \item[--] Os trincos são \textbf{libertados} aquando da confirmação da transação.
+\end{itemize}
+
+\subsection{Protocolo Two-Phase Locking}
+O \textbf{protocolo two-phase locking} assegure serialização. Requer que cada transação emita pedidos de bloqueio e desbloquio de trinco em 2 fases:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] Fase \textbf{Crescente}/\textit{Growing Phase}: uma transação pode obter trincos, mas não pode libertá-los;
+    \item[--] Fase \textbf{Decrescente}/\textit{Shrinking Phase}: uma transação pode libertar trincos, mas não pode obter nenhum trinco novo;
+\end{itemize}
+Inicialmente uma transação está na fase crescente e adquire trincos à medida que necessita. Mal liberte um dos trincos, entra na fase decrescente e não pode emitir mais pedidos.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{cap_transct/trincos_tempo_2pl.png}
+    \caption{Gráfico de Trincos vs Tempo no 2PL}
+\end{figure}
+
+Rollbacks por cascata podem ser evitado usando uma modificação do \textit{2PL} chamada \textbf{Protocolo Strict Two-Phase Locking} - igual à 2PL, porém os trincos \textbf{exclusivos} ficam trancados até a transação ter sido confirmada. Outra variante é o \textbf{Protocolo Rigorous Two-Phase Locking} - igual à S2PL, mas aplica-se também aos trincos partilhados e não só aos exclusivos.
+
+Por fim à concorrência, existe também uma política de controlo de concorrência alternativa aos trincos - \textbf{timestamps}. Se a transação $T_1$ iniciou a execução antes de $T_2$, então o sistema deve garantir o resultado da serialização \{$T_1, T_2$\}, oue seja, $T_1$ não pode ler dados alterados por $T_2$ e $T_1$ não pode alterar dados que $T_2$ já tenha lido.
+
+\section{Recuperação}
+Uma parte integral de um SGBD é um \textbf{esquema de recuperação} que consegue restaurar a base de dados para um estado consistente que existia antes da falha.
+
+\subsection{Classificação de Falha}
+Existem duas categorias de falhas:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] \textbf{Falhas de sistema} - afeta as transações no sistema, sem haver deficiência permanente nele. (ex.: falta de corrente elétrica, erro de software);
+    \item[--] \textbf{Falhas de componentes} - existe uma avaria num dos componentes do sistema. (ex.: avaria do disco rígido).
+\end{itemize}
+
+\subsection{Armazenamento}
+Quando o SGBD arranca após uma falta tem que recuprar as transações em curso, analisando um \textbf{registo de log} e refazer as transações com confirmação aceite e desfazer as que não têm - só depois é que o sistema está operacional.
+
+Existem 3 tipos de armazenamento:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] Armazenamento volátil: não sobrevive ao \textit{crash} e \textit{boot} do sistema;
+    \item[--] Armazenamento não-volátil: sobrevive ao \textit{crash} e \textit{boot} do sistema;
+    \item[--] \textbf{Armazenamento estável}: tem a redundância de \textit{hardware} para permitir N falhas de \textit{hardware}.
+\end{itemize}
+
+O \textbf{armazenamento estável} desempenha um papel crítico em algoritmos de recuperação.
 \end{document}
