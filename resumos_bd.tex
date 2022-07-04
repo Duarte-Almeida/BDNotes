@@ -1901,7 +1901,7 @@ EXEC SQL DECLARE iinfo CURSOR FOR
 -- Ciclo na linguagem host para dar fetch
 do {
     EXEC SQL FETCH iinfo INTO :c_iname, :c_age; -- dar fetch p variaveis locais
-    printf("%s is %d years old!\n", c_sname, c_age); -- codigo C puro
+    printf("%s is %d years old!\n", c_iname, c_age); -- codigo C puro
 } while (SQLSTATE != '02000');
 EXEC SQL CLOSE iinfo; -- fechar o cursor
 \end{lstlisting}
@@ -2448,7 +2448,7 @@ Existem, como tal, 3 caminhos possíveis para a conclusão de uma transação:
     \caption{3 caminhos possíveis de uma transação}
 \end{figure}
 
-As transações tem 4 grandes propriedades (\textbf{ACID}):
+As transações possuem 4 grandes propriedades (\textbf{ACID}):
 \begin{itemize}
     \itemsep0cm
     \item[--] \textbf{Atomicidade}: numa transação, as alterações ao estado são \textbf{atómicas}: ou todas se realizam ou nenhuma se realiza - a função do sistema é manter informação sobre as alterações efetuadas por cada transação ativa e, em caso de \textit{crash} ou \textit{abort} explícito, desfazer as alterações feitas desde o início da transação até ao ponto de rutura.
@@ -2544,4 +2544,185 @@ Definimos ainda sobre os níveis de isolamento em SQL:
     \caption{Consistência e Isolamento em SQL}
 \end{figure}
 
+\section{Concorrência}
+Logo no 1º capítulo vimos que um SGBD contém um módulo \textit{Concurrency Manager}, que por sua vez garante \textbf{C}oerência e \textbf{I}solamento das transações.
+
+\subsection{Isolamento de Transação e Serialização}
+A execução de transações concorrentes \textbf{em série} é ineficiente, pelo que se permite que várias transações corram simultaneamente no sistema. Isto traz algumas \textbf{vantagens}:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] \textbf{Maior utilização do disco e processadores} - aumento do \textit{throughput};
+    \item[--] \textbf{Redução do tempo médio de resposta} das transações.
+\end{itemize}
+
+\begin{definition}[Escalonamento/\textit{Schedule}]
+    Sequência de instruções que especificam a ordem cronológica na qual as instruções de transações concorrentes são executadas.
+    \begin{itemize}
+        \itemsep 0cm
+        \item[--] Um escalonamento de um conjunto de transações inclui todas as instruções de todas as transações.
+        \item[--] \textbf{Tem de preservar a ordem} na qual as instroções aparecem em cada transação individual.
+    \end{itemize}
+\end{definition}
+
+Um escalonamento diz-se \textbf{serial} se na sequência de instruções das várias transações, as instruções relativas a uma única transação aparecem seguidas.
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Escalonamentos em Série]{{\includegraphics[width=8.1cm]{cap_transct/schedule_serial.png} }}%
+    \qquad
+    \subfloat[\centering Escalonamentos Equivalentes]{{\includegraphics[width=8.1cm]{cap_transct/schedule_eqvlnt.png} }}%
+    \caption{Escalonamento de Transações}%
+    \label{fig:example}%
+\end{figure}
+
+Se repararmos nos escalonamentos equivalentes, notamos que o escalonamento não precisa ser serial para produzir o resultado correto, mas tem de ser \textbf{equivalente} a um escalonamento serial para o considerarmos \textbf{serializável}.
+
+Para os escalonamentos introduzimos uma \textbf{visão simplificada} das transações, considerando apenas as instruções de leitura e escrita na análise destas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.35]{cap_transct/visao_simplificada.png}
+    \caption{Visão simplificada de uma Transação}
+\end{figure}
+
+Consideremos agora um escalonamento \textit{S}, no qual existem 2 instruções consecutivas, $I$ e $J$, das transações $T_i$ e $T_j$ respetivamente ($i \neq j$). Se $I$ e $J$ se referirem a objetos diferentes, então podemos trocar $I$ e $J$ sem afetar os resultados de qualquer instrução do escalonamento. Contudo, se se refirem ao mesmo objeto Q, então a ordem destes passos é relevante. Dada a \textbf{visão simplificada} das transações, só consideramos as instruções de leitura e escrita e temos os seguintes 4 casos:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] $I$: \textbf{read}(Q), $J$: \textbf{read}(Q) - a ordem de $I$ e $J$ é irrelevante, visto que o mesmo valor de Q vai ser lido por $T_i$ e $T_j$, independentemente da ordem;
+    \item[--] $I$: \textbf{read}(Q), $J$: \textbf{write}(Q) - se $I$ vem antes de $J$, então $T_i$ não lê o valor de Q que está a ser escrito por $T_j$ na instrução J. Se J vier antes de I, então $T_i$ lê o valor a ser escirot. Logo, a ordem é relevante.
+    \item[--] $I$: \textbf{write}(Q), $J$: \textbf{read}(Q) - análogo ao caso anterior.
+    \item[--] $I$: \textbf{write}(Q), $J$: \textbf{write}(Q) - visto que ambas as instruções são de escrita, a ordem não afeta nenhuma das transações $T_i$ e $T_j$. Contudo, o valor a ser obtido na próxima instrução de \textbf{read(Q)} de S é afteada, visto que o resultado de apenas 1 das escritas é preservado na base de dados. Assim, a ordem é também relevante.
+\end{itemize}
+
+Dizemos então que $I$ e $J$ têm um \textbf{conflito} se são operações de \textbf{transações diferentes} que acedem ao mesmo objeto, e pelo menos 1 dessas instruções é uma \textbf{escrita}.
+
+Se $I$ e $J$ são instruções de transações diferentes e não têm conflito entre si, então podemos trocar a ordem para criar um novo escalonamento \textbf{S'}, que é equivalente a \textbf{S}, visto que todas as instruções estão na mesma ordem exceto para $I$ e $J$, cuja ordem é irrelevante - se um escalonamento \textbf{S} pode ser transformado noutro escalonamento \textbf{S'} por uma série de trocas de instruções não-conflituosas, diz-se que \textbf{S} e \textbf{S'} são \textbf{equivalentes sem conflitos}.
+Dizemos também que um escalonamento \textbf{S} tem \textbf{conflitos serializáveis} se é equivalente a um escalonamento serial.
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Escalonamento com Conflito Serializável]{{\includegraphics[width=4.1cm]{cap_transct/sch_confl_ser.png} }}%
+    \qquad
+    \subfloat[\centering Escalonamento com Conflito Não Serializável]{{\includegraphics[width=8.1cm]{cap_transct/sch_non_confl_ser.png} }}%
+    \caption{Escalonamento com Conflitos}%
+    \label{fig:example}%
+\end{figure}
+De notar que a figura em (b) tem um conflito não serializável, pois se tivéssemos $<T_3 , T_4>$, o próximo \textbf{read}(Q) iria ler o resultado da transação $T_4$, e se tivermos $<T_4 , T_3>$ a transação $T_3$ irá ler o valor da escrita em $T_4$.
+
+Uma maneira simples e eficiente de determinar conflitos de serialização num escalonamento é construir um \textbf{grafo de precedência} a partir de um escalonamento \textbf{S}. O grafo consiste num par $G = (V, E)$, onde $V$ é um conjunto de vértices e $E$ um conjunto de arestas. O conjunto de \textbf{vértices} $V$ é dado por todas as transações $T_i$ que participam no escalonamento. O conjunto de \textbf{arestas} consiste em todas as arestas $T_i \rightarrow T_j$ no qual 1 das 3 condições se verificam:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] $T_i$ executa \textbf{write}(Q) antes de $T_j$ executar \textbf{read}(Q);
+    \item[--] $T_i$ executa \textbf{read}(Q) antes de $T_j$ executar \textbf{write}(Q);
+    \item[--] $T_i$ executa \textbf{write}(Q) antes de $T_j$ executar \textbf{write}(Q);
+\end{itemize}
+
+Se uma aresta $T_i \rightarrow T_j$ existe no grafo de precedência, então em qualquer escalonamento serial \textbf{S'} equivalente a \textbf{S}, $T_i$ tem de aparecer \textbf{antes} de $T_j$.
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Escalonamento Serializável]{{\includegraphics[width=7cm]{cap_transct/grafo_prec_1.png} }}%
+    \qquad
+    \subfloat[\centering Escalonamento Não Serializável]{{\includegraphics[width=7cm]{cap_transct/grafo_prec_2.png} }}%
+    \caption{Escalonamento Serializável}%
+    \label{fig:example}%
+\end{figure}
+
+Um escalonamento é \textbf{serializável} se o seu grafo de precedências não tiver ciclos - se o grafo for acíciclo, podemos obter uma \textbf{ordenação topológica} e executar as transações sobre uma qualquer. De notar que isto é uma condição \textbf{suficiente}, mas não \textbf{necessária}, pois existem casos de escalonamentos serializáveis cujo grafo de precedência contém um ciclo.
+
+\subsection{Isolamento e Atomicidade de uma Transação}
+Até agora vimos escalonamentos que assumem que não existem falhas nas transações.
+
+Se uma transação $T_i$ falha, precisamos reverter os seus efeitos, e os efeitos de qualquer transação $T_j$ que esteja a ser executada concorrentemente com $T_i$ e que dependa desta.
+
+Um \textbf{escalonamento parcial} define-se por \textbf{não ter} as operações de \textbf{commit} ou \textbf{abort} em todas as transações que este abrange, como é o caso do escalonamento abaixo.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.3]{cap_transct/irrecuperavel_esc.png}
+    \caption{Escalonamento não recuperável}
+\end{figure}
+Como $T_7$ confirma a transação logo a seguir a ler A, i.e., ainda quando $T_6$ está ativa. Se $T_6$ falhar antes de confirmar, terá de reverter todas as suas instruções e $T_7$ já confirmou uma transação de um valor que fora revertido - $T_7$ é \textbf{dependente} de $T_6$, pelo que devemos abortar também $T_7$ por questões de atomicidade. Como tal, diz-se que este escalonamento é \textbf{não-recuperável}.
+
+\begin{definition}[Escalonamento Recuperável]
+    Um escalonamento diz-se recuperável sse para cada par de transações $T_i$ e $T_j$, tal que $T_j$ lê dados escritos previamente por $T_i$, então a confirmação de $T_i$ tem de aparecer antes da confirmação de $T_j$.
+\end{definition}
+
+Para o exemplo acima ser recuperável, $T_7$ teria de esperar até $T_6$ confirmar para poder confirmar a sua própria transação.
+
+Isto pode criar o efeito de \textbf{rollbacks em cadeia}, como é o seguinte caso:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.3]{cap_transct/cadeia_rollback.png}
+    \caption{Rollbacks em cadeia}
+\end{figure}
+
+Uma pequena extensão que se fazem às transações são \textbf{savepoints} - são usados dentro das transações como "pontos seguros" das aplicações cujo estado é conhecido e a partir dos quais a computação pode recomeçar. Os \textbf{rollbacks} podem ser para \textbf{savepoints}.
+
+\subsection{Protocolo de Isolamento com Trincos}
+Uma maneira de assegurar isolamento é requisitar que objetos de dados sejam acedidos por exclusão mútua, i.e, se uma transação acede um objeto, nenhuma outra transação pode modificar esse mesmo - para isso usamos \textbf{trincos}.
+
+Existem 2 modos de trincos sobre objetos:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] \textbf{Partilhado}. Se uma transação $T_i$ obteve um \textbf{trinco partilhado} (seja este \textbf{S}) no objeto Q, então $T_i$ pode ler, mas não pode escrever em Q.
+    \item[--] \textbf{Exclusivo}. Se uma transação $T_i$ obteve um \textbf{trinco exclusivo} (seja este \textbf{X}) no objeto Q, então $T_i$ pode ler e escrever em Q.
+\end{itemize}
+A transação \textbf{pede} o modo de trinco apropriado de acordo o tipo de operações que vai executar sobre o objeto Q - o pedido é feito ao \textit{Concurrency Control Manager} do SGBD, e bloqueia até lhe ser concedido (fica em \textit{wait-state}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{cap_transct/matriz_compatibilidade.png}
+    \caption{Matriz de Compatibilidade dos Modos de Trinco}
+\end{figure}
+
+De forma simples, o protocolo de acesso a objetos nas transações concorrentes é dado por:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] Uma transação tem que adquirir um trinco \textbf{partilhado} antes de tentar ler o valor de um tuplo.
+    \item[--] Uma transação tem que adquiri um trinco \textbf{exclusivo} antes de tentar escrever o valor de um tuplo.
+    \item[--] Os trincos são \textbf{libertados} aquando da confirmação da transação.
+\end{itemize}
+
+\subsection{Protocolo Two-Phase Locking}
+O \textbf{protocolo two-phase locking} assegure serialização. Requer que cada transação emita pedidos de bloqueio e desbloquio de trinco em 2 fases:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] Fase \textbf{Crescente}/\textit{Growing Phase}: uma transação pode obter trincos, mas não pode libertá-los;
+    \item[--] Fase \textbf{Decrescente}/\textit{Shrinking Phase}: uma transação pode libertar trincos, mas não pode obter nenhum trinco novo;
+\end{itemize}
+Inicialmente uma transação está na fase crescente e adquire trincos à medida que necessita. Mal liberte um dos trincos, entra na fase decrescente e não pode emitir mais pedidos.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{cap_transct/trincos_tempo_2pl.png}
+    \caption{Gráfico de Trincos vs Tempo no 2PL}
+\end{figure}
+
+Rollbacks por cascata podem ser evitado usando uma modificação do \textit{2PL} chamada \textbf{Protocolo Strict Two-Phase Locking} - igual à 2PL, porém os trincos \textbf{exclusivos} ficam trancados até a transação ter sido confirmada. Outra variante é o \textbf{Protocolo Rigorous Two-Phase Locking} - igual à S2PL, mas aplica-se também aos trincos partilhados e não só aos exclusivos.
+
+Por fim à concorrência, existe também uma política de controlo de concorrência alternativa aos trincos - \textbf{timestamps}. Se a transação $T_1$ iniciou a execução antes de $T_2$, então o sistema deve garantir o resultado da serialização \{$T_1, T_2$\}, oue seja, $T_1$ não pode ler dados alterados por $T_2$ e $T_1$ não pode alterar dados que $T_2$ já tenha lido.
+
+\section{Recuperação}
+Uma parte integral de um SGBD é um \textbf{esquema de recuperação} que consegue restaurar a base de dados para um estado consistente que existia antes da falha.
+
+\subsection{Classificação de Falha}
+Existem duas categorias de falhas:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] \textbf{Falhas de sistema} - afeta as transações no sistema, sem haver deficiência permanente nele. (ex.: falta de corrente elétrica, erro de software);
+    \item[--] \textbf{Falhas de componentes} - existe uma avaria num dos componentes do sistema. (ex.: avaria do disco rígido).
+\end{itemize}
+
+\subsection{Armazenamento}
+Quando o SGBD arranca após uma falta tem que recuprar as transações em curso, analisando um \textbf{registo de log} e refazer as transações com confirmação aceite e desfazer as que não têm - só depois é que o sistema está operacional.
+
+Existem 3 tipos de armazenamento:
+\begin{itemize}
+    \itemsep 0cm
+    \item[--] Armazenamento volátil: não sobrevive ao \textit{crash} e \textit{boot} do sistema;
+    \item[--] Armazenamento não-volátil: sobrevive ao \textit{crash} e \textit{boot} do sistema;
+    \item[--] \textbf{Armazenamento estável}: tem a redundância de \textit{hardware} para permitir N falhas de \textit{hardware}.
+\end{itemize}
+
+O \textbf{armazenamento estável} desempenha um papel crítico em algoritmos de recuperação.
 \end{document}
